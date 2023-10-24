@@ -20,6 +20,7 @@
 ".\objects\mt_lora.o"
 ".\objects\algorithm.o"
 ".\objects\mt_wifi.o"
+".\objects\mt_4g.o"
 ".\objects\app.o"
 ".\objects\os_system.o"
 ".\objects\cpu.o"
