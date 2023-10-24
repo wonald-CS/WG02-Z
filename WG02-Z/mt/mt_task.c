@@ -16,7 +16,7 @@ void mt_task_Init(void)
 void mt_task(void)
 {
     mt_lora_Config();
-    mt_wifi_Config();
+    //mt_wifi_Config();
 }
 
 
