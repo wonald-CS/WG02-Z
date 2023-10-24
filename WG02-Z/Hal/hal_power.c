@@ -14,13 +14,13 @@ void hal_WIFI_Power_ON(void)
 }
 
 
-void hal_4G_Power_OFF(void)
+void hal_4G_Power_HIGH(void)
 {
 	GPIO_SetBits(EC200S_POWER_PORT,EC200S_POWER_PIN);
 }
 
 
-void hal_4G_Power_ON(void)
+void hal_4G_Power_LOW(void)
 {
 	GPIO_ResetBits(EC200S_POWER_PORT,EC200S_POWER_PIN);
 }
@@ -46,5 +46,5 @@ void hal_PowerInit(void)
 
 	
 	hal_WIFI_Power_ON();	
-	hal_4G_Power_ON();
+	hal_4G_Power_LOW();
 }

@@ -11,8 +11,8 @@
 
 void hal_WIFI_Power_ON (void);
 void hal_WIFI_Power_OFF (void);
-void hal_4G_Power_OFF(void);
-void hal_4G_Power_ON(void);
+void hal_4G_Power_HIGH(void);
+void hal_4G_Power_LOW(void);
 
 void hal_PowerInit(void);
 

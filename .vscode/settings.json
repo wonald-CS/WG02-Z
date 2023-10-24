@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "hal_power.h": "c",
+        "mt_4g.h": "c"
+    }
+}
