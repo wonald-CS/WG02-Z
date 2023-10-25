@@ -411,7 +411,7 @@ void hal_UsartProc(void)
 	{
 		wifiTestDelay = 0;
 		hal_wifi_DataSent("AT\r\n",4);	
-		USART1_PutInDebugInfo("MCU WIFI send:AT to esp8266\r\n");
+		//USART1_PutInDebugInfo("MCU WIFI send:AT to esp8266\r\n");
 	} 
 
 }
