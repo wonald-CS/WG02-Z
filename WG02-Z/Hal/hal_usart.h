@@ -39,7 +39,6 @@ typedef void (*Usart2DateRx)(unsigned char pdat);
 
 void hal_UsartInit(void);
 void hal_UsartProc(void);
-void hal_Lora_Proc(void);
 
 void hal_lora_DataSent(unsigned char *buf,unsigned char len);
 void hal_wifi_DataSent(unsigned char  *buf,unsigned int  len);

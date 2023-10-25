@@ -3,16 +3,16 @@
         {
             "name": "Target 1",
             "includePath": [
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\mdk",
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\App",
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\Hal",
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\Libraries\\CMSIS\\CM3\\CoreSupport",
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\Libraries\\STM32F10x_StdPeriph_Driver\\inc",
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\mt",
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\OS",
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\User",
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\Startup",
-                "c:\\Users\\86159\\Desktop\\WG02-231023（Z）\\Libraries\\STM32F10x_StdPeriph_Driver\\src"
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\mdk",
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\App",
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\Hal",
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\Libraries\\CMSIS\\CM3\\CoreSupport",
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\Libraries\\STM32F10x_StdPeriph_Driver\\inc",
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\mt",
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\OS",
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\User",
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\Startup",
+                "d:\\My code\\git clone\\WG02-Z\\WG02-Z\\Libraries\\STM32F10x_StdPeriph_Driver\\src"
             ],
             "defines": [
                 "USE_STDPERIPH_DRIVER",

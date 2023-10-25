@@ -404,20 +404,15 @@ void hal_UsartInit()
 
 void hal_UsartProc(void)
 {	
-	// static unsigned short wifiTestDelay = 0;
+	static unsigned short wifiTestDelay = 0;
 	hal_uart1_DMA_DatSent();
-	// wifiTestDelay  ++;
-	// if(wifiTestDelay  > 299)
-	// {
-	// 	wifiTestDelay = 0;
-	// 	hal_wifi_DataSent("AT\r\n",4);	
-	// 	USART1_PutInDebugInfo("MCU send:AT to esp8266\r\n");
-	// } 
+	wifiTestDelay  ++;
+	if(wifiTestDelay  > 299)
+	{
+		wifiTestDelay = 0;
+		hal_wifi_DataSent("AT\r\n",4);	
+		USART1_PutInDebugInfo("MCU WIFI send:AT to esp8266\r\n");
+	} 
 
 }
 
-
-void hal_Lora_Proc(void)
-{		
-
-}
