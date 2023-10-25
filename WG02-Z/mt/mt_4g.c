@@ -35,6 +35,6 @@ void mt_4g_Init(void)
 
 void mt_4g_Config(void)
 {
-    EC200N_Power_On();
+    //EC200N_Power_On();
 }
 
