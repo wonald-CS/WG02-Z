@@ -2,7 +2,6 @@
 #include "stm32F10x.h"
 #include "string.h"
 #include "OS_System.h"
-#include "hal_power.h"
 
 
 volatile Queue512 DebugTxMsg;		

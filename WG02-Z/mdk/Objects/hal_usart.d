@@ -31,4 +31,3 @@
 .\objects\hal_usart.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
 .\objects\hal_usart.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\string.h
 .\objects\hal_usart.o: ..\OS\OS_System.h
-.\objects\hal_usart.o: ..\Hal\hal_power.h

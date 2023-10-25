@@ -8,3 +8,4 @@
 .\objects\hal_task.o: ..\Hal\hal_key.h
 .\objects\hal_task.o: ..\Hal\hal_usart.h
 .\objects\hal_task.o: ..\Hal\hal_power.h
+.\objects\hal_task.o: ..\Hal\hal_adc.h

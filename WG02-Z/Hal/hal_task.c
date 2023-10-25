@@ -7,6 +7,7 @@
 #include "hal_key.h"
 #include "hal_usart.h"
 #include "hal_power.h"
+#include "hal_adc.h"
 
 
 void hal_task_Init(void)
@@ -19,6 +20,7 @@ void hal_task_Init(void)
     hal_key_Init();
     hal_UsartInit();
     hal_PowerInit();
+    hal_AdcInit();
 }
 
 
@@ -27,7 +29,7 @@ void hal_task(void)
 {
     hal_GetTemHum_Proc();
     hal_KeyProc();
-    //USART1_PutInDebugInfo("Welcom to ZCS earn money device\n\r");
     hal_UsartProc();
+    hal_Adc_Bat_Proc();
 }
 
