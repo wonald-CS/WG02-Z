@@ -45,6 +45,5 @@ void hal_PowerInit(void)
 	GPIO_Init(EC200S_POWER_PORT, &GPIO_InitStructure);
 
 	
-	hal_WIFI_Power_ON();	
-	hal_4G_Power_LOW();
+	hal_WIFI_Power_ON();	  
 }

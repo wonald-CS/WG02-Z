@@ -2,6 +2,7 @@
 #include "stm32F10x.h"
 #include "string.h"
 #include "OS_System.h"
+#include "hal_power.h"
 
 
 volatile Queue512 DebugTxMsg;		
@@ -350,15 +351,6 @@ void hal_usart_Usart2DateRxCBSRegister(Usart2DateRx pCBS)
 }
 
 
-void hal_4G_DataSent(unsigned char *buf,unsigned int len)
-{
-	unsigned int i;
-	for(i=0;i<len;i++)		
-	{		   
-		while(USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);	  
-		USART_SendData(USART2,buf[i]);
-	}	 	
-}
 
 void hal_4G_StringSent(unsigned char *buf)
 {
@@ -407,12 +399,12 @@ void hal_UsartProc(void)
 	static unsigned short wifiTestDelay = 0;
 	hal_uart1_DMA_DatSent();
 	wifiTestDelay  ++;
-	if(wifiTestDelay  > 299)
+	if(wifiTestDelay > 299)
 	{
 		wifiTestDelay = 0;
-		hal_wifi_DataSent("AT\r\n",4);	
-		//USART1_PutInDebugInfo("MCU WIFI send:AT to esp8266\r\n");
-	} 
+		//hal_4G_StringSent("ATI\r\n");	
+		USART1_PutInDebugInfo("HeartBeat\r\n");
+	}
 
 }
 

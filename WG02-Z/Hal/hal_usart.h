@@ -42,7 +42,6 @@ void hal_UsartProc(void);
 
 void hal_lora_DataSent(unsigned char *buf,unsigned char len);
 void hal_wifi_DataSent(unsigned char  *buf,unsigned int  len);
-void hal_4G_DataSent(unsigned char *buf,unsigned int len);
 void hal_4G_StringSent(unsigned char *buf);
 
 void USART1_PutInDebugString(unsigned char pData[],unsigned char len);
