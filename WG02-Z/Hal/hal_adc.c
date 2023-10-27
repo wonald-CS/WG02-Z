@@ -56,7 +56,7 @@ static void hal_adc_Config(void)
 
 
 
-unsigned short Get_Adc(unsigned char ch)
+static unsigned short hal_Get_Adc(unsigned char ch)
 {
     ADC_RegularChannelConfig(ADC1,ADC_Channel_1,1,ADC_SampleTime_239Cycles5);//ADC1,ADC通道1，采样时间HSI239.5个周期  
     ADC_SoftwareStartConvCmd(ADC1,ENABLE);//使能指定的ADC的软件转换功能，我们的是ADC1		
