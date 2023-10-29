@@ -439,11 +439,6 @@
               <FileType>1</FileType>
               <FilePath>..\Hal\hal_power.c</FilePath>
             </File>
-            <File>
-              <FileName>hal_adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Hal\hal_adc.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
