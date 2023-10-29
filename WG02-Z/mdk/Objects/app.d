@@ -4,3 +4,6 @@
 .\objects\app.o: ..\Hal\hal_key.h
 .\objects\app.o: ..\mt\mt_tftlcd.h
 .\objects\app.o: ..\mt\mt_lora.h
+.\objects\app.o: ..\Hal\hal_adc.h
+.\objects\app.o: ..\Hal\hal_usb.h
+.\objects\app.o: ..\mt\lcdfont.h

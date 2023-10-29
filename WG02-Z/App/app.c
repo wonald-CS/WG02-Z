@@ -3,6 +3,9 @@
 #include "hal_key.h"
 #include "mt_tftlcd.h"
 #include "mt_lora.h"
+#include "hal_adc.h"
+#include "hal_usb.h"
+#include "lcdfont.h"
 
 
 
@@ -13,6 +16,7 @@ static void App_TempHum_show(unsigned char fuc);
 static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta);
 static str_LoraAppNetState stgMenu_LoraDetectorApplyNetPro(Detector_EVENT event,Data_AppNet_Handle pData);
 static unsigned char str_lora_loracommPro(Detector_EVENT event,Data_AppNet_Handle pData);
+static void PowerState_icon_Display(void);
 
 void app_task_Init(void)
 {
@@ -25,6 +29,7 @@ void app_task_Init(void)
 void app_task(void)
 {
     App_TempHum_show(0);
+		PowerState_icon_Display();
 }
 
 
@@ -215,3 +220,75 @@ static str_LoraAppNetState stgMenu_LoraDetectorApplyNetPro(Detector_EVENT event,
 	}
 	return loraApplyNetSta;
 }
+
+
+static void PowerState_icon_Display(void)
+{
+	//static unsigned char batVolt = 0;
+	static unsigned short InteralTim;
+	if(Usb_Ac_Det() == Sta_Link)
+	{///AC Link
+		LCD_ShowPicture32PixFont(COOR_ICON_AC_X,COOR_ICON_AC_Y,ICON_32X32_ACLINK,HUE_LCD_FONT,HUE_LCD_BACK,0);
+		if(hal_adc_returnVoltLevel() == LEVEL_FULL)
+		{
+			InteralTim = 0;
+			LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,(ICON_32X32_BAT_LEVEL0+hal_adc_returnVoltLevel()),HUE_LCD_FONT,HUE_LCD_BACK,0);	
+		}
+		else 
+		//if(hal_adc_ChargSta() == STA_BAT_CHARGING)
+		{
+			InteralTim ++;
+			if(InteralTim == 50)
+			{
+				LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,ICON_32X32_BAT_LEVEL0,HUE_LCD_FONT,HUE_LCD_BACK,0);	
+			}
+			else if(InteralTim == 100)
+			{
+				LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,ICON_32X32_BAT_LEVEL1,HUE_LCD_FONT,HUE_LCD_BACK,0);	
+			}
+			else if(InteralTim == 150)
+			{
+				LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,ICON_32X32_BAT_LEVEL2,HUE_LCD_FONT,HUE_LCD_BACK,0);	
+			}				
+			else if(InteralTim == 200)
+			{
+				LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,ICON_32X32_BAT_LEVEL3,HUE_LCD_FONT,HUE_LCD_BACK,0);	
+			}
+			else if(InteralTim == 250)
+			{
+				LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,ICON_32X32_BAT_LEVEL4,HUE_LCD_FONT,HUE_LCD_BACK,0);	
+			}	
+			else if(InteralTim == 300)
+			{
+				InteralTim = 0;
+				LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,ICON_32X32_BAT_LEVEL5,HUE_LCD_FONT,HUE_LCD_BACK,0);	
+			}	
+		}
+	}
+	else
+	{///AC break; add wifi state
+		LCD_ShowPicture32PixFont(COOR_ICON_AC_X,COOR_ICON_AC_Y,ICON_32X32_ACBREAK,HUE_LCD_FONT,HUE_LCD_BACK,0);
+		////电池图标显示部分
+		if(hal_adc_returnVoltLevel() <= LEVEL_VOLT_1)
+		{
+			InteralTim ++;
+			if(InteralTim == 50) //500ms
+			{
+				LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,(ICON_32X32_BAT_LEVEL0+hal_adc_returnVoltLevel()),HUE_LCD_FONT,HUE_LCD_BACK,0);		
+			}
+			else if(InteralTim > 100)
+			{
+				InteralTim = 0;
+				//hal_Tftlcd_ClearIcon(33,1);
+				LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,ICON_32X32_CLEAR,HUE_LCD_FONT,HUE_LCD_BACK,0);		
+			}
+		}
+		else
+		{
+			InteralTim = 0;
+			LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,(ICON_32X32_BAT_LEVEL0+hal_adc_returnVoltLevel()),HUE_LCD_FONT,HUE_LCD_BACK,0);			
+		}
+	}
+}	
+
+
