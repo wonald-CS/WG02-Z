@@ -2,6 +2,8 @@
     "files.associations": {
         "os_system.h": "c",
         "hal_adc.h": "c",
-        "hal_power.h": "c"
+        "hal_power.h": "c",
+        "hal_eeprom.h": "c",
+        "stm32f10x.h": "c"
     }
 }

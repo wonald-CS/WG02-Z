@@ -444,6 +444,11 @@
               <FileType>1</FileType>
               <FilePath>..\Hal\hal_adc.c</FilePath>
             </File>
+            <File>
+              <FileName>hal_eeprom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hal\hal_eeprom.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
