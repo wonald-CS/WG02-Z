@@ -1,5 +1,4 @@
 .\objects\hal_key.o: ..\Hal\hal_key.c
-.\objects\hal_key.o: ..\Hal\hal_key.h
 .\objects\hal_key.o: E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include\stm32F10x.h
 .\objects\hal_key.o: ..\Libraries\CMSIS\CM3\CoreSupport\core_cm3.h
 .\objects\hal_key.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\stdint.h
@@ -30,3 +29,4 @@
 .\objects\hal_key.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_wwdg.h
 .\objects\hal_key.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
 .\objects\hal_key.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\string.h
+.\objects\hal_key.o: ..\Hal\hal_key.h

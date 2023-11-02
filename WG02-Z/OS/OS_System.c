@@ -45,11 +45,8 @@ void OS_TaskInit(void)
 * Description    : 创建任务 
 * Input          : - ID：任务ID
 *					- (*proc)() 用户函数入口地址 
-*					- TimeDly 任务执行频率，单位ms
-* 					- flag 任务就绪状态  OS_SLEEP-休眠 OS_RUN-运行 
-* Output         : None
-* Return         : None
-* Attention		 : None
+*					- Period任务执行频率，单位10ms
+* 			  - flag 任务就绪状态  OS_SLEEP-休眠 OS_RUN-运行 
 *******************************************************************************/
 void OS_CreatTask(unsigned char ID, void (*proc)(void), unsigned short Period, OS_TaskStatusTypeDef flag)
 {	
@@ -82,11 +79,9 @@ void OS_ClockInterruptHandle(void)
 			{
 				OS_Task[i].RunTimer = 0;
 				OS_Task[i].RunFlag = OS_RUN;//把任务的状态设置成执行，任务调度函数会一直判断这个变量的值，如果是OS_RUN就会执行task指向的函数。
-			}
-			
+			}	
 		}
 	}
-	
 }
 
 /*******************************************************************************

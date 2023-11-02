@@ -1,29 +1,5 @@
-#ifndef _HAL_WTN6_H_
-#define _HAL_WTN6_H_
-
-
-
-#define WTN6_CLK_PORT  GPIOC          //语音芯片WTN6
-#define WTN6_CLK_PIN   GPIO_Pin_1 
-
-#define WTN6_DAT_PORT  GPIOC
-#define WTN6_DAT_PIN   GPIO_Pin_2 
-
-#define SC8002_SH_PORT  GPIOA         //运放芯片SC8002
-#define SC8002_SH_PIN   GPIO_Pin_0 
-
-
-#define WTN6_CLK_HIGH  GPIO_SetBits(WTN6_CLK_PORT,WTN6_CLK_PIN)
-#define WTN6_CLK_LOW   GPIO_ResetBits(WTN6_CLK_PORT,WTN6_CLK_PIN)
-
-#define WTN6_DAT_HIGH  GPIO_SetBits(WTN6_DAT_PORT,WTN6_DAT_PIN)
-#define WTN6_DAT_LOW   GPIO_ResetBits(WTN6_DAT_PORT,WTN6_DAT_PIN)
-
-#define SC8002_SH_HIGH  GPIO_SetBits(SC8002_SH_PORT,SC8002_SH_PIN)
-#define SC8002_SH_LOW   GPIO_ResetBits(SC8002_SH_PORT,SC8002_SH_PIN)
-
-
-
+#ifndef ____HAL_WTN6_H_
+#define ____HAL_WTN6_H_
 
 enum
 {
@@ -58,11 +34,9 @@ enum
 	WTN6_VOLUE_110_15,         ///音效 110报警声音
 	WTN6_VOLUE_110_18,         ///音效 110报警声音
 };
-
-
-
-
-void hal_Wtn6Init(void);
-void hal_Wtn6_Play(unsigned char VolNum);
+	
+	
+void hal_wtn6(void);
+void hal_Wtn6_PlayVolue(unsigned char VolNum);
 
 #endif

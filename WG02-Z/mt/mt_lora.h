@@ -1,31 +1,31 @@
-#ifndef _MT_LORA_H_
-#define _MT_LORA_H_
+#ifndef ____MT_LORA_H_
+#define ____MT_LORA_H_
 
+typedef enum //typevent :char
+{
+	LORA_COM_APPLY_NET = 1, ///申请入网
+	LORA_COM_HEAT,   ///心跳包
+	LORA_COM_BAT_LOW,//电池低压
+	LORA_COM_ALARM,  //系统报警
+	LORA_COM_TAMPER, //防拆按键
+	LORA_COM_DISARM, //系统撤防  遥控器
+   LORA_COM_AWAYARM,  //离家布防
+	LORA_COM_HOMEARM, //在家布防
+	LORA_COM_CLOSE,   //门磁开门
 
-#define App_Net_Len 19
-#define Else_Move_Len 6
+	LORA_COM_RESPOSE_APPLY_NET = 0X81, ///申请入网
+	LORA_COM_RESPOSE_HEAT,  ///心跳包
+	LORA_COM_RESPOSE_BAT_LOW,//电池低压
+	LORA_COM_RESPOSE_ALARM,  //系统报警
+	LORA_COM_RESPOSE_TAMPER, //防拆按键
+	LORA_COM_RESPOSE_DISARM, //系统撤防  遥控器
+    LORA_COM_RESPOSE_AWAYARM,  //离家布防
+	LORA_COM_RESPOSE_HOMEARM, //在家布防
+	LORA_COM_RESPOSE_CLOSE,   //门磁开门
+	
+	LORA_COM_RESPOSE_NONODE = 0xff,   //没有找到相关节点
 
-typedef struct Data_AppNet_Re{
-    unsigned char Head;
-    unsigned char Len;
-    unsigned char Data[16];
-    unsigned char CheckSum;
-}Data_AppNet_Receive;
-
-typedef struct Data_Else_Re{
-    unsigned char Head;
-    unsigned char Len;
-    unsigned char Data[3];
-    unsigned char CheckSum;
-}Data_Else_Receive;
-
-
-typedef struct Data_AppNet_Dle{
-	unsigned char cmd;              //功能码
-	unsigned char node[2];          //CRC
-	unsigned char Macaddr[12];      //探测器MAC地址
-	unsigned char detectorType;     //探测器类型
-}Data_AppNet_Handle;
+}en_lora_eventTypedef;
 
 
 typedef enum
@@ -38,39 +38,26 @@ typedef enum
 typedef struct 
 {
 	en_LoraApplyNet state;
-	unsigned char code;  
+	unsigned char code;  //
 }str_LoraAppNetState;
 
 
+typedef struct  
+{
+	//en_lora_eventTypedef cmd;
+	unsigned char cmd;
+	unsigned char node[2];
+	unsigned char addr[12];
+	unsigned char detectorType;/* data */
+}str_cmdApplyNet;
 
-typedef enum{
-  Detector_IDLE = 0,
-  Detector_AppNet,                //探测器申请入网
-  Detector_HeartBeat,             //心跳包
-  Detector_LowBatrery,            //电池低压
-  Detector_SysAlert,              //系统报警
-  Detector_Disarm = 6,            //撤防 
-  Detector_AwayArm,               //离家布防       
-  Detector_HomeArm,               //在家布防
-  Detector_DoorClose,             //门磁关门
-  
-  Detector_Respose_AppNet = 0x81,
-  Detector_Respose_HeartBeat,              //心跳包
-  Detector_Respose_LowBatrery,            //电池低压
-  Detector_Respose_SysAlert,              //系统报警
-  Detector_Respose_Disarm = 0x86,         //撤防 
-  Detector_Respose_AwayArm,               //离家布防       
-  Detector_Respose_HomeArm,               //在家布防
-  Detector_Respose_DoorClose,             //门磁关门 
+#define STR_COMAPPLYNET_SIZE	sizeof(str_cmdApplyNet)	
 
-  Detector_None = 0xff,
-}Detector_EVENT;
+typedef str_LoraAppNetState (*loraRxDataApplyNet_callback_t)(en_lora_eventTypedef event,str_cmdApplyNet pData); 
+typedef unsigned char (*loraRxDataPro_callback_t)(en_lora_eventTypedef event,str_cmdApplyNet pData);
 
-typedef str_LoraAppNetState (*loraRxDataApplyNet_callback_t)(Detector_EVENT event,Data_AppNet_Handle pData); 
-typedef unsigned char (*loraRxDataPro_callback_t)(Detector_EVENT event,Data_AppNet_Handle pData);
-
-void mt_lora_Init(void);
-void mt_lora_Config(void);
+void mt_lora_init(void);
+void mt_lora_Pro(void);
 void mt_loraRxApplyNet_callback_Register(loraRxDataApplyNet_callback_t pCBS);
 void mt_lora_loracomm_callback_Register(loraRxDataPro_callback_t pCBS);
 

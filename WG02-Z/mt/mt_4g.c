@@ -1,40 +1,50 @@
 #include "mt_4g.h"
-#include "hal_power.h"
+#include "mt_api.h"
+#include "hal_GPIO.H"
+#include "OS_System.h"
+#include "hal_uart.h"
+#include "string.h"
 
-static unsigned char EC200N_PowerTime;
+EC200C_variable  ES200C_Var;
 
-
-
-//EC200N开机函数
-void EC200N_Power_On(void)
-{
-    if (EC200N_PowerTime < 100)
-    {
-        EC200N_PowerTime++;
-        //先拉高至少30ms
-        if (EC200N_PowerTime == 5)
-        {
-            hal_4G_Power_HIGH();            //再拉低至少500MS后可以拉高或者不操作，完成开机
-        }else if (EC200N_PowerTime == 85)   //800MS
-        {
-            hal_4G_Power_LOW();
-        }
-        
-    }
-    
-}
-
-
+static void EC200S_PutOnHandler(void);
 
 void mt_4g_Init(void)
 {
-	EC200N_PowerTime = 0;
-    hal_4G_Power_LOW();        //IO口低电平，EC200的POWEkey为高电平
+    ES200C_Var.powerKeytime = 0;
+    hal_GPIO_4GPowerKey_L(); 
 }
-
-
-void mt_4g_Config(void)
+void mt_4g_pro(void)
 {
-    EC200N_Power_On();
+    EC200S_PutOnHandler();
 }
+
+/****************************************************
+功能:4G模块开机任务函数
+********************************************************/
+static void EC200S_PutOnHandler(void)
+{
+	if(ES200C_Var.powerKeytime < 100)
+	{
+		ES200C_Var.powerKeytime ++;
+		if(ES200C_Var.powerKeytime == 5)
+			hal_GPIO_4GPowerKey_H();
+		else  if(ES200C_Var.powerKeytime == 80) //75*10 =750MS
+		{
+			hal_GPIO_4GPowerKey_L(); 
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
 

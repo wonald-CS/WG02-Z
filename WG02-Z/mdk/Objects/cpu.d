@@ -1,4 +1,4 @@
-.\objects\cpu.o: ..\OS\CPU.c
+.\objects\cpu.o: ..\OS\cpu.c
 .\objects\cpu.o: E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include\stm32F10x.h
 .\objects\cpu.o: ..\Libraries\CMSIS\CM3\CoreSupport\core_cm3.h
 .\objects\cpu.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\stdint.h

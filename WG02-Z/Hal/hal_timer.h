@@ -4,7 +4,7 @@
 typedef enum
 {
 	T_LED,					//LED定时器
-	T_WTN6,					//WTN6语音定时器
+  T_WTN6,
 	T_SUM,
 }TIMER_ID_TYPEDEF;
 	

@@ -1,36 +1,37 @@
 #include "hal_task.h"
+#include "hal_task.h"
 #include "hal_timer.h"
 #include "hal_led.h"
-#include "hal_usb.h"
+#include "hal_gpio.h"
 #include "hal_wtn6.h"
 #include "hal_al6630.h"
 #include "hal_key.h"
-#include "hal_usart.h"
-#include "hal_power.h"
+#include "hal_uart.h"
 #include "hal_adc.h"
+#include "hal_eeprom.h"
 
 
-void hal_task_Init(void)
+void hal_task_init(void)
 {
-    hal_timerInit();
-    hal_UsbInit();
-    hal_LedInit();
-    hal_Wtn6Init();
-    hal_Al6630_Init();
-    hal_key_Init();
-    hal_UsartInit();
-    hal_PowerInit();
-		hal_Adc_batInit();
+	hal_timerInit();	
+	hal_GpioConfig_init();		
+	hal_LedInit();
+	hal_wtn6();
+	hal_timer_capInit();
+	hal_keyInit();
+  hal_UsartInit();
+  hal_UsartProc();
+	hal_Adc_batInit();
+	hal_eepromInit();
 }
-
-
 
 void hal_task(void)
 {
-    hal_GetTemHum_Proc();
-    hal_KeyProc();
-    //USART1_PutInDebugInfo("Welcom to ZCS earn money device\n\r");
-    hal_UsartProc();
-		hal_BatCheckProc();
+	hal_GetTemHumProc();
+	hal_KeyProc();	
+	hal_UsartProc();
+	hal_BatCheckProc();
 }
+
+
 

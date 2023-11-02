@@ -1,8 +1,9 @@
-#ifndef _HAL_TASK_H
-#define _HAL_TASK_H
+#ifndef ___HAL_TASK_H_
+#define ___HAL_TASK_H_
 
 
+void hal_task_init(void);
 void hal_task(void);
-void hal_task_Init(void);
+
 
 #endif

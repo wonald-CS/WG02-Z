@@ -1,9 +1,10 @@
-#ifndef _MT_TASK_H
-#define _MT_TASK_H
+#ifndef ____MT_TASK_H_
+#define ____MT_TASK_H_
 
 
+void mt_task_init(void);
 void mt_task(void);
-void mt_task_Init(void);
+
+
 
 #endif
-

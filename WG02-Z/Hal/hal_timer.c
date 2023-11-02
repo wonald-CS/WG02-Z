@@ -21,8 +21,8 @@ static void hal_timer4Config(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 	
 	TIM_DeInit(TIM4); 
-	TIM_TimeBaseStructure.TIM_Period = 50; 			    // 50uS 进入中断
-	TIM_TimeBaseStructure.TIM_Prescaler = SystemCoreClock/1000000 - 1;               //分频系数71，1us计数1次
+	TIM_TimeBaseStructure.TIM_Period = 50; 			    // 50uS
+	TIM_TimeBaseStructure.TIM_Prescaler = SystemCoreClock/1000000 - 1;              
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;     
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 
 	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);	
@@ -217,4 +217,5 @@ void TIM4_IRQHandler(void)
 	TIM_ClearFlag(TIM4, TIM_FLAG_Update);
 }
 
+/////////////////////////////////
 

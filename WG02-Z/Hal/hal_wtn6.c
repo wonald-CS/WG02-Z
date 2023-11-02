@@ -1,16 +1,29 @@
-#include "hal_wtn6.h"
+#include "hal_wTn6.h"
 #include "stm32F10x.h"
 #include "hal_timer.h"
 
-////语音芯片
+#define WTN6_CLK_PORT    GPIOC
+#define WTN6_CLK_PIN     GPIO_Pin_1
 
-												//5MS  100us
+#define WTN6_DAT_PORT    GPIOC
+#define WTN6_DAT_PIN     GPIO_Pin_2
+
+#define SC8002_SH_PORT	 GPIOA
+#define SC8002_SH_PIN    GPIO_Pin_0
+
+#define WTN6_CLK_LOW   GPIO_ResetBits(WTN6_CLK_PORT,WTN6_CLK_PIN)
+#define WTN6_CLK_HIG   GPIO_SetBits(WTN6_CLK_PORT,WTN6_CLK_PIN)
+
+#define WTN6_DAT_LOW   GPIO_ResetBits(WTN6_DAT_PORT,WTN6_DAT_PIN)
+#define WTN6_DAT_HIG   GPIO_SetBits(WTN6_DAT_PORT,WTN6_DAT_PIN)
+
+#define SC8002_SH_LOW   GPIO_ResetBits(SC8002_SH_PORT,SC8002_SH_PIN)
+#define SC8002_SH_HIG   GPIO_SetBits(SC8002_SH_PORT,SC8002_SH_PIN)
 unsigned short wtn6[] = {50,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};	
-unsigned char Wtn6Playflag;			// CLK位置
-unsigned char Wtn6VolueNum;			// 播放第几首语音
-unsigned char Wtn6NextNum; 			// 下一首
-volatile unsigned short Wtn6Timer;  //CLK持续时间
-
+unsigned char Wtn6Playflag;// CLK???
+unsigned char Wtn6VolueNum;// ???????
+unsigned char Wtn6NextNum; // ????????
+volatile unsigned short Wtn6Timer;  //??WTN????
 static void hal_Wtn6_PlayHandle(void);
 	
 static void hal_Wtn6Config(void)
@@ -18,12 +31,17 @@ static void hal_Wtn6Config(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE); 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
- 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);  	
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);  	
 
 	GPIO_InitStructure.GPIO_Pin = WTN6_CLK_PIN | WTN6_DAT_PIN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; ; 
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = SC8002_SH_PIN;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; ; 
+	GPIO_Init(SC8002_SH_PORT, &GPIO_InitStructure);	
 	
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
@@ -31,24 +49,16 @@ static void hal_Wtn6Config(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; ; 
 	GPIO_Init(GPIOC, &GPIO_InitStructure);	
 	
-	WTN6_DAT_HIGH;
-	WTN6_CLK_HIGH;
-	
+	GPIO_SetBits(GPIOC,GPIO_Pin_1);	
+	GPIO_SetBits(GPIOC,GPIO_Pin_2);
+	GPIO_SetBits(SC8002_SH_PORT,SC8002_SH_PIN);	
 }
-void hal_SC8002Config(void)
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = SC8002_SH_PIN;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
-	GPIO_Init(SC8002_SH_PORT, &GPIO_InitStructure);	
-	
-	SC8002_SH_HIGH;
-}
-void hal_Wtn6Init(void)
+
+void hal_wtn6(void)
 {
 	hal_Wtn6Config();
-	hal_SC8002Config();
+	WTN6_DAT_HIG;
+	WTN6_CLK_HIG;
 	Wtn6Playflag = 0;
 	Wtn6VolueNum = 0;
 	Wtn6NextNum = 0xff;
@@ -56,69 +66,77 @@ void hal_Wtn6Init(void)
 
 static void hal_Wtn6_PlayHandle(void)
 {
-    static unsigned char VolNum;
-    static unsigned char Time_Num;
-    Wtn6Timer--;
-    if(Wtn6Timer == 0){
-        Wtn6Playflag++;
-        Wtn6Timer = wtn6[Wtn6Playflag];
-        Time_Num = Wtn6Playflag;
-        if(Time_Num % 2 == 0)
-        {
-            Time_Num = 1;
-        }else{
-            Time_Num = 0;
-        }
-
-        switch (Time_Num)
-        {
-					case 0:
+	static unsigned char VolueNum;
+	Wtn6Timer--;
+	if(Wtn6Timer == 0)
+	{
+			Wtn6Playflag ++;
+		        Wtn6Timer= wtn6[Wtn6Playflag];
+			switch(Wtn6Playflag)
+			{
+				case 1:
+					VolueNum = Wtn6VolueNum;
+					WTN6_CLK_LOW;
+					if(VolueNum & 0x01)
 					{
-							if (Wtn6Playflag == 1)
-							{
-									VolNum = Wtn6VolueNum;
-							}
-
-							WTN6_CLK_LOW;
-							if(VolNum & 0x01)
-							{
-									WTN6_DAT_HIGH;
-							}else{
-									WTN6_DAT_LOW;
-							}             
-							
-							break;
+							WTN6_DAT_HIG;
 					}
-
-					case 1:
+					else
 					{
-							WTN6_CLK_HIGH;
-							VolNum >>= 1;
-						
-							break;
+							WTN6_DAT_LOW;
+					}		
+				break;
+				case 2:
+				case 4:
+				case 6:
+				case 8:
+				case 10:
+				case 12:
+				case 14:
+			  case 16:
+				{
+						WTN6_CLK_HIG;	
+					  VolueNum >>= 1;
+				}		
+				break;
+				case 3:
+				case 5:
+				case 7:
+				case 9:
+				case 11:
+				case 13:
+				case 15:	
+				{
+					WTN6_CLK_LOW;	
+					if(VolueNum & 0x01)
+					{
+							WTN6_DAT_HIG;
 					}
-        
-        }
-
+					else
+					{
+							WTN6_DAT_LOW;
+					}				
+				}
+				break;
+			}
 			if(Wtn6Playflag == 17)
 			{
-				WTN6_DAT_HIGH;
-				WTN6_CLK_HIGH;
+				WTN6_DAT_HIG;
+				WTN6_CLK_HIG;
 				Wtn6Playflag = 0;
 				if(Wtn6NextNum != 0xff)
 				{
-					hal_Wtn6_Play(Wtn6NextNum);
+					hal_Wtn6_PlayVolue(Wtn6NextNum);
 					Wtn6NextNum = 0xff;
 				}
 				return;
 			}
-    }
-
-    hal_ResetTimer(T_WTN6,T_STA_START);	
+	}
+	hal_ResetTimer(T_WTN6,T_STA_START);	
 }
 
 
-void hal_Wtn6_Play(unsigned char VolNum)
+void hal_Wtn6_PlayVolue(unsigned char VolNum)
 {
 	if(Wtn6Playflag == 0)
 	{

@@ -5,14 +5,12 @@ extern void S_QueueDataIn(unsigned char **Head, unsigned char **Tail, unsigned c
 extern unsigned char S_QueueDataOut(unsigned char **Head, unsigned char **Tail, unsigned char *HBuff, unsigned short Len, unsigned char *Data);
 extern unsigned short S_QueueDataLen(unsigned char **Head, unsigned char **Tail, unsigned short Len);
  
- 
 #define QueueEmpty(x)	   S_QueueEmpty((unsigned char**)&(x).Head,(unsigned char**)&(x).Tail,(unsigned char*)(x).Buff) 
 #define QueueDataIn(x,y,z) S_QueueDataIn((unsigned char**)&(x).Head,(unsigned char**)&(x).Tail,(unsigned char*)(x).Buff,sizeof((x).Buff),(y),(z))
 #define QueueDataOut(x,y)  S_QueueDataOut((unsigned char**)&(x).Head,(unsigned char**)&(x).Tail,(unsigned char*)(x).Buff,sizeof((x).Buff),(y)) 
 #define QueueDataLen(x)	   S_QueueDataLen((unsigned char**)&(x).Head,(unsigned char**)&(x).Tail,sizeof((x).Buff))  
 
-
-/* ï¿½ï¿½ï¿½Ð½á¹¹ï¿½å¶¨ï¿½ï¿½,ï¿½ï¿½ï¿½å²»Í¬ï¿½ï¿½Ð¡ï¿½Ä¶ï¿½ï¿½ï¿½ */
+/* ¶ÓÁÐ½á¹¹Ìå¶¨Òå,¶¨Òå²»Í¬´óÐ¡µÄ¶ÓÁÐ */
 typedef struct
 {
 	unsigned char *Head; 
@@ -40,45 +38,46 @@ typedef struct{unsigned char *Head; unsigned char *Tail; unsigned char Buff[1024
 
 typedef enum
 {
-	CPU_ENTER_CRITICAL,		//CPUï¿½ï¿½ï¿½ï¿½ï¿½Ù½ï¿½
-	CPU_EXIT_CRITICAL,		//CPUï¿½Ë³ï¿½ï¿½Ù½ï¿½
+	CPU_ENTER_CRITICAL,		//CPU½øÈëÁÙ½ç
+	CPU_EXIT_CRITICAL,		//CPUÍË³öÁÙ½ç
 }CPU_EA_TYPEDEF;
 
-//ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½CPUï¿½Ð¶Ï¿ï¿½ï¿½Æ»Øµï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½CPUInterrupt_CallBack_t,
+//¶¨ÒåÒ»¸öCPUÖÐ¶Ï¿ØÖÆ»Øµ÷º¯ÊýÖ¸Õë,±ðÃûCPUInterrupt_CallBack_t,
 typedef void (*CPUInterrupt_CallBack_t)(CPU_EA_TYPEDEF cmd,unsigned char *pSta);
 
 
-//ÏµÍ³ï¿½ï¿½ï¿½ï¿½ID
+//ÏµÍ³ÈÎÎñID
 typedef enum
 {
 	OS_TASK1,
 	OS_TASK2,
 	OS_TASK3,
-	OS_TASK4,
-	OS_TASK5,
-	OS_TASK6,
+//	OS_TASK4,
+//	OS_TASK5,
+//	OS_TASK6,
+//	OS_TASK7,	
 	OS_TASK_SUM	
 }OS_TaskIDTypeDef;
 
 
-//ÏµÍ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬,ï¿½ï¿½Ê±Ã»ï¿½Ãµï¿½
+//ÏµÍ³ÈÎÎñÔËÐÐ×´Ì¬,ÔÝÊ±Ã»ÓÃµ½
 typedef enum
 {
-	OS_SLEEP,			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	OS_RUN=!OS_SLEEP	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	OS_SLEEP,			    //ÈÎÎñÐÝÃß
+	OS_RUN=!OS_SLEEP	//ÈÎÎñÔËÐÐ
 }OS_TaskStatusTypeDef;
 
-//ÏµÍ³ï¿½ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½
+//ÏµÍ³ÈÎÎñ½á¹¹Ìå
 typedef struct
 {
-	void (*task)(void);					//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-	OS_TaskStatusTypeDef RunFlag;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
-	unsigned short	RunPeriod;			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½
-	unsigned short RunTimer;			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½Ê±ï¿½ï¿½
+	void (*task)(void);					//ÈÎÎñº¯ÊýÖ¸Õë
+	OS_TaskStatusTypeDef RunFlag;		//ÈÎÎñÔËÐÐ×´Ì¬
+	unsigned short	RunPeriod;			//ÈÎÎñµ÷¶ÈÆµÂÊ
+	unsigned short RunTimer;			//ÈÎÎñµ÷¶È¼ÆÊ±Æ÷
 }OS_TaskTypeDef;
 
 
-/*	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */ 
+/*	º¯ÊýÉùÃ÷ */ 
 /*******************************************************************************/
 void OS_CPUInterruptCBSRegister(CPUInterrupt_CallBack_t pCPUInterruptCtrlCBS);
 void OS_ClockInterruptHandle(void);

@@ -24,7 +24,7 @@ void hal_BatCheckProc(void)
 	static unsigned short interalTim = 0;
 	static en_batlevel level = LEVEL_FULL;
 	static unsigned char times = 0;
-	en_batlevel batlevelSta;
+    en_batlevel batlevelSta;
 	
 	batlevelSta = hal_adc_batVoltCheck();
 	if(batlevelSta == LEVEL_IDLE)

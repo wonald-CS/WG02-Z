@@ -10,9 +10,8 @@
       <TargetName>Target 1</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCC</pArmCC>
       <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
-      <uAC6>8</uAC6>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F105RC</Device>
@@ -190,7 +189,7 @@
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>1</useUlib>
+            <useUlib>0</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -395,9 +394,9 @@
               <FilePath>..\Hal\hal_timer.c</FilePath>
             </File>
             <File>
-              <FileName>hal_usb.c</FileName>
+              <FileName>hal_Gpio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Hal\hal_usb.c</FilePath>
+              <FilePath>..\Hal\hal_Gpio.c</FilePath>
             </File>
             <File>
               <FileName>hal_flash.c</FileName>
@@ -410,14 +409,14 @@
               <FilePath>..\Hal\hal_tftlcd.c</FilePath>
             </File>
             <File>
-              <FileName>hal_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Hal\hal_task.c</FilePath>
-            </File>
-            <File>
               <FileName>hal_wtn6.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Hal\hal_wtn6.c</FilePath>
+            </File>
+            <File>
+              <FileName>hal_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hal\hal_task.c</FilePath>
             </File>
             <File>
               <FileName>hal_al6630.c</FileName>
@@ -430,14 +429,9 @@
               <FilePath>..\Hal\hal_key.c</FilePath>
             </File>
             <File>
-              <FileName>hal_usart.c</FileName>
+              <FileName>hal_uart.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Hal\hal_usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>hal_power.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Hal\hal_power.c</FilePath>
+              <FilePath>..\Hal\hal_uart.c</FilePath>
             </File>
             <File>
               <FileName>hal_adc.c</FileName>
@@ -500,9 +494,9 @@
               <FilePath>..\mt\mt_lora.c</FilePath>
             </File>
             <File>
-              <FileName>Algorithm.c</FileName>
+              <FileName>mt_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\mt\Algorithm.c</FilePath>
+              <FilePath>..\mt\mt_api.c</FilePath>
             </File>
             <File>
               <FileName>mt_wifi.c</FileName>
@@ -510,9 +504,9 @@
               <FilePath>..\mt\mt_wifi.c</FilePath>
             </File>
             <File>
-              <FileName>mt_4g.c</FileName>
+              <FileName>mt_4G.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\mt\mt_4g.c</FilePath>
+              <FilePath>..\mt\mt_4G.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -535,9 +529,9 @@
               <FilePath>..\OS\OS_System.c</FilePath>
             </File>
             <File>
-              <FileName>CPU.c</FileName>
+              <FileName>cpu.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\OS\CPU.c</FilePath>
+              <FilePath>..\OS\cpu.c</FilePath>
             </File>
           </Files>
         </Group>

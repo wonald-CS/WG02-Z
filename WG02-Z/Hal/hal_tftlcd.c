@@ -1,9 +1,9 @@
 #include "hal_tftlcd.h"
 #include "stm32F10x.h"
 
-
-////液晶屏
-
+// AC Check Pin
+#define LCD_SCLK__PORT       GPIOB
+#define LCD_SCLK__PIN        GPIO_Pin_3
 
 //-----------------LCD端口定义---------------- 
 #define LCD_SCLK_Clr() GPIO_ResetBits(GPIOB,GPIO_Pin_3)//SCL=SCLK
@@ -35,7 +35,7 @@ void hal_tftlcdConfig(void)
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_AFIO, ENABLE);  //相关IO的初始化
 		
-    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);    //复用重映射
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 
    //RES-PA15
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;	 
@@ -140,7 +140,7 @@ void hal_oled_RestL(void)
 }
 
 /******************************************************************************
-      函数说明：LCD写入数据（1字节）
+      函数说明：LCD写入数据
       入口数据：dat 写入的数据
       返回值：  无
 ******************************************************************************/
@@ -150,7 +150,7 @@ void LCD_WR_DATA8(unsigned char dat)
 }
 
 /******************************************************************************
-      函数说明：LCD写入数据（2字节）
+      函数说明：LCD写入数据
       入口数据：dat 写入的数据
       返回值：  无
 ******************************************************************************/

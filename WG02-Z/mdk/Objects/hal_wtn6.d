@@ -1,5 +1,5 @@
 .\objects\hal_wtn6.o: ..\Hal\hal_wtn6.c
-.\objects\hal_wtn6.o: ..\Hal\hal_wtn6.h
+.\objects\hal_wtn6.o: ..\Hal\hal_wTn6.h
 .\objects\hal_wtn6.o: E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include\stm32F10x.h
 .\objects\hal_wtn6.o: ..\Libraries\CMSIS\CM3\CoreSupport\core_cm3.h
 .\objects\hal_wtn6.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\stdint.h

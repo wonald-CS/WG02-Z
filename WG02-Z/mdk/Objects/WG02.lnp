@@ -1,15 +1,14 @@
 --cpu Cortex-M3
 ".\objects\hal_led.o"
 ".\objects\hal_timer.o"
-".\objects\hal_usb.o"
+".\objects\hal_gpio.o"
 ".\objects\hal_flash.o"
 ".\objects\hal_tftlcd.o"
-".\objects\hal_task.o"
 ".\objects\hal_wtn6.o"
+".\objects\hal_task.o"
 ".\objects\hal_al6630.o"
 ".\objects\hal_key.o"
-".\objects\hal_usart.o"
-".\objects\hal_power.o"
+".\objects\hal_uart.o"
 ".\objects\hal_adc.o"
 ".\objects\hal_eeprom.o"
 ".\objects\main.o"
@@ -20,7 +19,7 @@
 ".\objects\lcdfont.o"
 ".\objects\mt_task.o"
 ".\objects\mt_lora.o"
-".\objects\algorithm.o"
+".\objects\mt_api.o"
 ".\objects\mt_wifi.o"
 ".\objects\mt_4g.o"
 ".\objects\app.o"
@@ -51,7 +50,7 @@
 ".\objects\stm32f10x_usart.o"
 ".\objects\stm32f10x_wwdg.o"
 ".\objects\core_cm3.o"
---library_type=microlib --strict --scatter ".\Objects\WG02.sct"
+--strict --scatter ".\Objects\WG02.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list ".\Listings\WG02.map" -o .\Objects\WG02.axf

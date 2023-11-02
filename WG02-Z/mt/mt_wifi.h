@@ -1,9 +1,7 @@
-#ifndef _MT_WIFI_H_
-#define _MT_WIFI_H_
+#ifndef ____HAL_WIFI_H_
+#define ____HAL_WIFI_H_
 
+void mt_wifi_init(void);
+void mt_wifi_pro(void);
 
-
-void mt_wifi_Init(void);
-void mt_wifi_Config(void);
 #endif
-
