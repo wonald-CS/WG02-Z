@@ -5,6 +5,7 @@
 #include "OS_System.h"
 #include "CPU.h"
 
+//2023.11.02 因为自己写的工程在移植eeprom的时候出问题：应该是前面定时器的配置出了问题导致死机（无法排查），所以直接用无际的课程
 int main(void)
 {
 	hal_CPUInit();
