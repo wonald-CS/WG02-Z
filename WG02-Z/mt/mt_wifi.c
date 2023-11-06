@@ -28,7 +28,7 @@ static void mt_wifi_RxMsgInput(unsigned char dat)
 static void hal_WifiRx_Pro(void)
 {
 	unsigned char len,i;
-  unsigned char rxbuffer[20];
+	unsigned char rxbuffer[20];
 	
   len = QueueDataLen(Wifi_RxIdxMsg);
 	if(len> 3)

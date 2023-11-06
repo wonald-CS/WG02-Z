@@ -366,7 +366,7 @@ static void hal_eeprom_test(void)
  void hal_eepromInit(void)
 {
 	hal_I2CConfig();
-	hal_eeprom_test();
+	//hal_eeprom_test();
 }
 
 

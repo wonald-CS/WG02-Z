@@ -203,7 +203,6 @@ void hal_UsartInit()
 	Uart3DateRxCBS = 0;
 	Uart5DateRxCBS = 0;
 	QueueEmpty(DebugTxMsg);
-	USART1_PutInDebugInfo("Welcom in wuji mcu debug\n\r");
 }
 ////
 void hal_UsartProc(void)
@@ -214,7 +213,7 @@ void hal_UsartProc(void)
 	if(usart2_4GTestDelay  > 299)
 	{
 		usart2_4GTestDelay = 0;
-		Hal_Uart3_Send_Data("AT\r\n",4);	
+		//Hal_Uart3_Send_Data("AT\r\n",4);	
 	} 
 }
 
