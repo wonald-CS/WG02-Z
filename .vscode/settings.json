@@ -4,6 +4,9 @@
         "hal_adc.h": "c",
         "hal_power.h": "c",
         "hal_eeprom.h": "c",
-        "stm32f10x.h": "c"
+        "stm32f10x.h": "c",
+        "mt_wifi.h": "c",
+        "hal_tftlcd.h": "c",
+        "hal_flash.h": "c"
     }
 }
