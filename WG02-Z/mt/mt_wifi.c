@@ -183,7 +183,7 @@ static void hal_WifiTx_Pro(void)
 	{
 		Time_Delay_WifiSent ++;
 		if(Time_Delay_WifiSent > 10)
-		{/////WIFI 指令发送间隔时间 100秒
+		{//WIFI 指令发送间隔时间 100ms
 			Time_Delay_WifiSent = 0;				
 			QueueDataOut(Wifi_TxIdxMsg,&Idx);     //读出队列数字，发送对应位置数据
 			WIFI_TxMsg_Send(&WIFI_TxBuff[Idx][0]);
@@ -195,7 +195,12 @@ static void hal_WifiTx_Pro(void)
 }
 
 
-
+/*******************************************************************************************
+*@description:wifi应用层初始化
+*@param[in]：*无
+*@return：无
+*@others：
+********************************************************************************************/
 void mt_wifi_init(void)
 {
 	unsigned char i;
@@ -210,6 +215,12 @@ void mt_wifi_init(void)
 }
 
 
+/*******************************************************************************************
+*@description:wifi应用层任务
+*@param[in]：*无
+*@return：无
+*@others：
+********************************************************************************************/
 void mt_wifi_pro(void)
 {
 	hal_WifiRx_Pro();
