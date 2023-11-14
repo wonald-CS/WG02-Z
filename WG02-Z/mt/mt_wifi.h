@@ -5,7 +5,6 @@
 #define ESP12_AT_LEN 70
 
 #define WIFI_TX_QUEUE_SUM			    10		//发送网关命令队列组个数	
-#define WIFI_TX_BUFFSIZE_MAX			200     //2 + 198
 
 
 enum

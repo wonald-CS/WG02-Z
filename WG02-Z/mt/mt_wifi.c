@@ -8,7 +8,7 @@ volatile Queue1K  Wifi_RxIdxMsg;
 volatile Queue16  Wifi_TxIdxMsg;	
 
 unsigned char WIFI_TxQueuePos;             		//下一条发送数据所在数组位置
-unsigned char WIFI_TxBuff[WIFI_TX_QUEUE_SUM][WIFI_TX_BUFFSIZE_MAX];
+unsigned char WIFI_TxBuff[WIFI_TX_QUEUE_SUM][ESP12_AT_LEN];
 
 
 const char ESP12_AT[ESP12_AT_MAX][ESP12_AT_LEN]=
@@ -70,7 +70,7 @@ void WIFI_TxMsgInput(unsigned char *pData)
 ********************************************************************************************/
 void mt_wifi_DataPack(unsigned char cmd,unsigned char *pdata)
 {
-	unsigned char DataPack_Array[WIFI_TX_BUFFSIZE_MAX];
+	unsigned char DataPack_Array[ESP12_AT_LEN];
 	unsigned i;
 
 	if (cmd < ESP12_AT_MAX)
@@ -126,11 +126,11 @@ void mt_wifi_DataPack(unsigned char cmd,unsigned char *pdata)
 ********************************************************************************************/
 void WIFI_TxMsg_Send(unsigned char *pData)
 {
-	unsigned char WIFITxDataBuff[WIFI_TX_BUFFSIZE_MAX];	
+	unsigned char WIFITxDataBuff[ESP12_AT_LEN];	
 	unsigned char i,SendBuff_len;
 	SendBuff_len = pData[0];
-	SendBuff_len -= 1;
-	for (i = 0; i < SendBuff_len; i++)
+
+	for (i = 0; i < SendBuff_len - 1; i++)
 	{
 		WIFITxDataBuff[i] = pData[i+1];
 	}
