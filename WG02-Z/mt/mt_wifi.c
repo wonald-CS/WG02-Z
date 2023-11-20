@@ -3,13 +3,14 @@
 #include "mt_wifi.h"
 #include "hal_Gpio.h"
 #include "string.h"
+#include "mt_api.h"
 
 volatile Queue1K  Wifi_RxIdxMsg;			
 volatile Queue16  Wifi_TxIdxMsg;	
 
 unsigned char WIFI_TxQueuePos;             		//下一条发送数据所在数组位置
-unsigned char WIFI_TxBuff[WIFI_TX_QUEUE_SUM][ESP12_AT_LEN];
-
+unsigned char WIFI_TxBuff[WIFI_TX_QUEUE_SUM][WIFI_TX_BUFFSIZE_MAX];
+unsigned char WIFI_RxBuff[WIFI_RXBUFFSIZE_MAX];
 
 const char ESP12_AT[ESP12_AT_MAX][ESP12_AT_LEN]=
 {
@@ -30,6 +31,22 @@ const char ESP12_AT[ESP12_AT_MAX][ESP12_AT_LEN]=
 	"AT+MQTTCLEAN=0",      						
 };
 
+
+const unsigned char ESP12_AT_ResPonse[ESP12_AT_RESPONSE_MAX][27]=
+{
+	"WIFI CONNECTED\0",   						//WIFI已连接
+	"WIFI DISCONNECT\0",						//WIFI未连接
+	"+CWSTATE:\0",    							//获取WIFI的链接状态	
+	"+CWJAP:\0",								//获取WIFI的信号值
+	"ERROR\0",           						//WIFI模块返回值	
+	"Smart get wifi info\0",
+	"smartconfig connected wifi\0",     		//获取WIFI密码成功 配网成功
+	"+CWLAP:\0",
+	"+MQTTCONNECTED:0\0",
+	"+MQTTDISCONNECTED:0\0",
+	"+MQTTSUBRECV:0,\0",
+	"OK\r\n\0",           						//WIFI模块返回值OK
+};
 
 
 static void mt_wifi_RxMsgInput(unsigned char dat)
@@ -70,7 +87,7 @@ void WIFI_TxMsgInput(unsigned char *pData)
 ********************************************************************************************/
 void mt_wifi_DataPack(unsigned char cmd,unsigned char *pdata)
 {
-	unsigned char DataPack_Array[ESP12_AT_LEN];
+	unsigned char DataPack_Array[WIFI_TX_BUFFSIZE_MAX];
 	unsigned i;
 
 	if (cmd < ESP12_AT_MAX)
@@ -126,11 +143,11 @@ void mt_wifi_DataPack(unsigned char cmd,unsigned char *pdata)
 ********************************************************************************************/
 void WIFI_TxMsg_Send(unsigned char *pData)
 {
-	unsigned char WIFITxDataBuff[ESP12_AT_LEN];	
+	unsigned char WIFITxDataBuff[WIFI_TX_BUFFSIZE_MAX];	
 	unsigned char i,SendBuff_len;
 	SendBuff_len = pData[0];
-
-	for (i = 0; i < SendBuff_len - 1; i++)
+	SendBuff_len -= 1;
+	for (i = 0; i < SendBuff_len; i++)
 	{
 		WIFITxDataBuff[i] = pData[i+1];
 	}
@@ -139,22 +156,155 @@ void WIFI_TxMsg_Send(unsigned char *pData)
 }
 
 
+
+/*******************************************************************************************
+*@description:解析通过串口接收ESP8266的应答数据
+*@param[in]：*pData：WIFI_RxBuff[0],  *res:接收的数据的枚举值,  *pIdx:字符串相同的起始下标,  num:接收数据长度
+*@return：0：匹配成功； 0xff：匹配失败；
+*@others：
+********************************************************************************************/
+unsigned char WIFI_RxMsg_Analysis(unsigned char *pData,unsigned char *res,unsigned char *pIdx,unsigned short num)
+{
+	unsigned char i,j;
+	for (j = 0; j < ESP12_AT_RESPONSE_MAX; j++)
+	{
+		i = SeekSrting(pData,(unsigned char*)ESP12_AT_ResPonse[j],num);
+		if (i != 0xff)
+		{
+			*res = j;
+			*pIdx = i;
+			return 0;
+		}
+		
+	}
+	return 0xff;
+}
+
+
+/*******************************************************************************************
+*@description:处理已解析完成的接收数据
+*@param[in]：*pData：WIFI_RxBuff[0],  res:接收的数据的枚举值, strlon：接收数据长度
+*@return：
+*@others：
+********************************************************************************************/
+static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res,unsigned short strlon)
+{
+	switch((unsigned char)res)
+	{
+		case ESP12_AT_RESPONSE_WIFI_CONNECTED:
+		{
+
+		}
+		break;
+		case ESP12_AT_RESPONSE_WIFI_DISCONNECT:
+		{
+
+		}
+		break;
+		case ESP12_AT_RESPONSE_CWSTATE:
+		{
+
+		}
+		break;
+		case ESP12_AT_RESPONSE_CWJAP:
+		{
+ 
+		}
+		break; 
+		case ESP12_AT_RESPONSE_ERROR:
+		{
+		}
+		break;
+		case ESP12_AT_RESPONSE_OK:
+		{
+		
+		}
+		break; 
+		case ESP12_AT_RESPONSE_CWLAP:
+		{
+		
+		}
+		break;
+		case ESP12_AT_RESPONSE_SMART_GET_WIFIWINFO:
+		{
+		
+		}
+		break;
+		case ESP12_AT_RESPONSE_SMART_SUC:
+		{  ///配网成功
+
+		}
+		break;	
+		case ESP12_AT_RESPONSE_MQTTCONN://	"+MQTTCONNECTED:0\0",
+		{
+			
+		}
+		break;
+		case ESP12_AT_RESPONSE_MQTTDISCONN:
+		{
+		}
+		break;
+		case ESP12_AT_RESPONSE_MQTTRECV://"+MQTTSUBRECV:0,\0",
+		{
+			  
+		}
+		break;
+	}
+}
+
+
 //接收测试函数
 static void hal_WifiRx_Pro(void)
 {
-	unsigned char len,i;
-	unsigned char rxbuffer[20];
+//	unsigned char len,i;
+//	unsigned char rxbuffer[20];
+//	
+//	len = QueueDataLen(Wifi_RxIdxMsg);
+//	if(len> 3)
+//	{
+//		if(len>=20)
+//		len = 20;
+//		for(i=0;i<len;i++)
+//		{
+//			QueueDataOut(Wifi_RxIdxMsg,&rxbuffer[i]);		
+//		}
+//		USART1_PutInDebugString(rxbuffer,len); 			
+//	}
 	
-	len = QueueDataLen(Wifi_RxIdxMsg);
-	if(len> 3)
+	en_esp12_atResponse response;
+	static unsigned short Rx_Data_len = 0;	
+	unsigned char StrAddr,Ret;
+	while (QueueDataLen(Wifi_RxIdxMsg) > 1)
 	{
-		if(len>=20)
-		len = 20;
-		for(i=0;i<len;i++)
+		//非MQTT指令
+		if(Rx_Data_len >= (WIFI_RXBUFFSIZE_MAX-5))
+		{//防止移除  
+				Rx_Data_len = 0;
+				return;
+		}	
+
+		QueueDataOut(Wifi_RxIdxMsg,&WIFI_RxBuff[Rx_Data_len++]);
+		if(WIFI_RxBuff[Rx_Data_len - 1] == 0x0D)
 		{
-			QueueDataOut(Wifi_RxIdxMsg,&rxbuffer[i]);		
+			WIFI_RxBuff[Rx_Data_len++] = 0x0A;
+			
+			//如OK回车换行：0x79 0x75 0x0D 0x0A     rxbufferIDX = 4
+			//接收数据最低长度为4？ OK\n\r
+			if (Rx_Data_len > 2)
+			{	//response通过指针，从函数里面赋值
+				Ret = WIFI_RxMsg_Analysis(&WIFI_RxBuff[0],&response,&StrAddr,Rx_Data_len);
+				if (Ret == 0)
+				{
+					Wifi_Rx_Response_Handle(&WIFI_RxBuff[0],response,Rx_Data_len);
+				}
+				
+			}
+			memset(&WIFI_RxBuff[0], 0, sizeof(WIFI_RXBUFFSIZE_MAX));	
+			Rx_Data_len = 0;
 		}
-		USART1_PutInDebugString(rxbuffer,len); 			
+
+
+		
 	}
 }
 
@@ -175,7 +325,7 @@ static void hal_WifiTx_Pro(void)
 		i = 0xff;
 		mt_wifi_DataPack(ESP12_AT_AT,&i);
 		mt_wifi_DataPack(ESP12_AT_ATE,&i);
-		mt_wifi_DataPack(ESP12_AT_CWSTATE,&i);		
+		//mt_wifi_DataPack(ESP12_AT_CWSTATE,&i);		
 	}
 
 	//发送
@@ -183,7 +333,7 @@ static void hal_WifiTx_Pro(void)
 	{
 		Time_Delay_WifiSent ++;
 		if(Time_Delay_WifiSent > 10)
-		{//WIFI 指令发送间隔时间 100ms
+		{/////WIFI 指令发送间隔时间 100秒
 			Time_Delay_WifiSent = 0;				
 			QueueDataOut(Wifi_TxIdxMsg,&Idx);     //读出队列数字，发送对应位置数据
 			WIFI_TxMsg_Send(&WIFI_TxBuff[Idx][0]);
@@ -195,12 +345,7 @@ static void hal_WifiTx_Pro(void)
 }
 
 
-/*******************************************************************************************
-*@description:wifi应用层初始化
-*@param[in]：*无
-*@return：无
-*@others：
-********************************************************************************************/
+
 void mt_wifi_init(void)
 {
 	unsigned char i;
@@ -212,15 +357,10 @@ void mt_wifi_init(void)
 	{
 		memset(&WIFI_TxBuff[i], 0, sizeof(WIFI_TxBuff[i]));
 	}	
+	memset(&WIFI_RxBuff[0], 0, sizeof(WIFI_RXBUFFSIZE_MAX));	
 }
 
 
-/*******************************************************************************************
-*@description:wifi应用层任务
-*@param[in]：*无
-*@return：无
-*@others：
-********************************************************************************************/
 void mt_wifi_pro(void)
 {
 	hal_WifiRx_Pro();

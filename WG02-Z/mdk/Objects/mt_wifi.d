@@ -4,3 +4,4 @@
 .\objects\mt_wifi.o: ..\mt\mt_wifi.h
 .\objects\mt_wifi.o: ..\Hal\hal_Gpio.h
 .\objects\mt_wifi.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\string.h
+.\objects\mt_wifi.o: ..\mt\mt_api.h
