@@ -5,6 +5,8 @@
 #include "string.h"
 #include "mt_api.h"
 
+///////注意：ESP8266只能配置2.4G频段的WIFI//////
+
 volatile Queue1K  Wifi_RxIdxMsg;			
 volatile Queue16  Wifi_TxIdxMsg;	
 
@@ -12,7 +14,10 @@ unsigned char WIFI_TxQueuePos;             		//下一条发送数据所在数组
 unsigned char WIFI_TxBuff[WIFI_TX_QUEUE_SUM][WIFI_TX_BUFFSIZE_MAX];
 unsigned char WIFI_RxBuff[WIFI_RXBUFFSIZE_MAX];
 
+
 en_Esp12_sta WIFI_Sta;
+en_WIFI_NetSta WIFI_NetSta;
+
 
 const char ESP12_AT[ESP12_AT_MAX][ESP12_AT_LEN]=
 {
@@ -23,7 +28,7 @@ const char ESP12_AT[ESP12_AT_MAX][ESP12_AT_LEN]=
 	"AT+CWAUTOCONN=1\0",						//								0:上电不自动链接AP    1:上电自动链接AP
 	"AT+CWSTARTSMART=2\0",						//启动某种类型的SmartConfig模式  1：ESP=TOUCH  2:AirKiss  3:AirKiss+Esptouch
 	"AT+CWSTOPSMART\0",							//停止SmartConfig	
-	"AT+CWSTATE?\0",      						//获取WIFI 的链接状态 
+	"AT+CWSTATE?\0",      						//获取WIFI 的链接状态        	 
 	"AT+CWLAP=\"\0",							//获取WIFI的信号强弱
 
 	"AT+MQTTUSERCFG=0,1,\"",  					//MQTT CONFESP12_AT_MQTTUSERCFG
@@ -39,10 +44,15 @@ const unsigned char ESP12_AT_ResPonse[ESP12_AT_RESPONSE_MAX][27]=
 	"WIFI CONNECTED\0",   						//WIFI已连接
 	"WIFI DISCONNECT\0",						//WIFI未连接
 	"+CWSTATE:\0",    							//获取WIFI的链接状态	
+												//0: ESP32 station 尚未进行任何 Wi-Fi 连接
+												//1: ESP32 station 已经连接上 AP，但尚未获取到 IPv4 地址
+												//2: ESP32 station 已经连接上 AP，并已经获取到 IPv4 地址
+												//3: ESP32 station 正在进行 Wi-Fi 连接或 Wi-Fi 重连
+												//4: ESP32 station 处于 Wi-Fi 断开状态
 	"+CWJAP:\0",								//获取WIFI的信号值
 	"ERROR\0",           						//WIFI模块返回值	
-	"Smart get wifi info\0",
-	"smartconfig connected wifi\0",     		//获取WIFI密码成功 配网成功
+	"Smart get wifi info\0",					//配置WIFI的名称和密码
+	"smartconfig connected wifi\0",     		//配网成功
 	"+CWLAP:\0",
 	"+MQTTCONNECTED:0\0",
 	"+MQTTDISCONNECTED:0\0",
@@ -51,8 +61,58 @@ const unsigned char ESP12_AT_ResPonse[ESP12_AT_RESPONSE_MAX][27]=
 };
 
 
+/*******************************************************************************************
+*@description:WIFI状态改变
+*@param[in]：sta：改变的枚举值
+*@return：无
+*@others：
+********************************************************************************************/
+void mt_wifi_changState(en_Esp12_sta sta)
+{
+	WIFI_Sta = sta;
+	QueueEmpty(Wifi_RxIdxMsg);
+}
 
-///////////////////////////////////////////////////
+
+/*******************************************************************************************
+*@description:WIFI联网状态和WIFI名称获取
+*@param[in]：*p：WIFI_RxBuff
+*@return：无
+*@others：
+********************************************************************************************/
+static void mt_wifi_CwstateResposePro(unsigned char *p)
+{
+	unsigned char *pdata;
+	unsigned char i = 0;
+
+	pdata = p;
+	//0x32   0 1 2 3 4 
+	//+CWSTATE:2,"Guest"
+	while(*pdata != ':') 
+	{
+		pdata++;	
+	}
+	pdata++;
+
+	WIFI_NetSta.WIFI_Net_Sta = *pdata - 0x30;
+
+	while(*pdata != '"')
+	{
+		pdata++;	
+	}			
+	pdata++;
+
+	//记录WIFI名称
+	while(*pdata != '"') 
+	{	
+		WIFI_NetSta.WIFI_SSid[i] = *pdata;
+		i++;
+		pdata++;
+		
+	}
+}
+
+
 
 /*******************************************************************************************
 *@description:WIFI模块外电或电源接入
@@ -68,7 +128,7 @@ static unsigned char mt_wifi_PowerManage(en_wifiPowerManageSta fuc)
 		if(fuc == STA_WIFI_POWER_RESET)
 		{//Close WIFI Power
 			StartTime = 0;	
-			WIFI_Sta = ESP12_STA_WIFI_POWER;
+			mt_wifi_changState(ESP12_STA_WIFI_POWER);
 		}
         if(StartTime == 0)
 		{
@@ -90,7 +150,7 @@ static unsigned char mt_wifi_PowerManage(en_wifiPowerManageSta fuc)
 	else
 	{// 电池供电  关闭WIFI 功能
 		StartTime = 0;
-		WIFI_Sta = ESP12_STA_WIFI_POWER;
+		mt_wifi_changState(ESP12_STA_WIFI_POWER);
 		hal_GPIO_WIFIPowerEN_H();
 		return 0;
 	}
@@ -251,58 +311,82 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 
 		}
 		break;
+
 		case ESP12_AT_RESPONSE_WIFI_DISCONNECT:
 		{
 
 		}
 		break;
+
 		case ESP12_AT_RESPONSE_CWSTATE:
 		{
-
+			memset(WIFI_NetSta.WIFI_SSid, 0, sizeof(WIFI_NetSta.WIFI_SSid));
+			mt_wifi_CwstateResposePro(pData);
+			if (WIFI_NetSta.WIFI_Net_Sta == ESP12_LINK_SUC)
+			{
+				mt_wifi_changState(ESP12_STA_DETEC_READY);
+			}else
+			{
+				mt_wifi_changState(ESP12_STA_WIFISTA);
+			}
+			
+			
 		}
 		break;
+
 		case ESP12_AT_RESPONSE_CWJAP:
 		{
  
 		}
 		break; 
+
 		case ESP12_AT_RESPONSE_ERROR:
 		{
 		}
 		break;
+
 		case ESP12_AT_RESPONSE_OK:
 		{
 			if(WIFI_Sta == ESP12_STA_WIFI_POWER)
 			{
-				WIFI_Sta = ESP12_STA_INIT;
+				mt_wifi_changState(ESP12_STA_INIT);
 			}
 			
 		}
 		break; 
+
 		case ESP12_AT_RESPONSE_CWLAP:
 		{
 		
 		}
 		break;
+
 		case ESP12_AT_RESPONSE_SMART_GET_WIFIWINFO:
-		{
+		{//获取WIFI名称和密码
 		
 		}
 		break;
-		case ESP12_AT_RESPONSE_SMART_SUC:
-		{  ///配网成功
 
+		case ESP12_AT_RESPONSE_SMART_SUC:
+		{  //配网成功
+			if (WIFI_Sta == ESP12_STA_WIFIConfig_Wait)
+			{
+				mt_wifi_changState(ESP12_STA_GETING_SUC);
+			}			
 		}
 		break;	
+
 		case ESP12_AT_RESPONSE_MQTTCONN://	"+MQTTCONNECTED:0\0",
 		{
 			
 		}
 		break;
+
 		case ESP12_AT_RESPONSE_MQTTDISCONN:
 		{
 		}
 		break;
+
 		case ESP12_AT_RESPONSE_MQTTRECV://"+MQTTSUBRECV:0,\0",
 		{
 			  
@@ -382,7 +466,7 @@ static void hal_WifiTx_Pro(void)
 	{
 		Time_Delay_WifiSent ++;
 		if(Time_Delay_WifiSent > 10)
-		{/////WIFI 指令发送间隔时间 100秒
+		{//WIFI 指令发送间隔时间 100秒
 			Time_Delay_WifiSent = 0;				
 			QueueDataOut(Wifi_TxIdxMsg,&Idx);     //读出队列数字，发送对应位置数据
 			WIFI_TxMsg_Send(&WIFI_TxBuff[Idx][0]);
@@ -399,7 +483,7 @@ static void hal_WifiTx_Pro(void)
 				i = 0xFF;
 				Time_Delay_WifiSta = 0;
 				mt_wifi_DataPack(ESP12_STA_RESET,&i);
-				WIFI_Sta = ESP12_STA_WIFI_POWER;
+				mt_wifi_changState(ESP12_STA_WIFI_POWER);
 			}
 		}
 			break;
@@ -412,6 +496,7 @@ static void hal_WifiTx_Pro(void)
 				Time_Delay_WifiSta = 0;
 				i = 0xff;
 				mt_wifi_DataPack(ESP12_AT_AT,&i);
+				//此处在接收到ATOK再作初始化处理
 				//WIFI_Sta = ESP12_STA_INIT;				
 			}
 		}
@@ -427,8 +512,7 @@ static void hal_WifiTx_Pro(void)
 				mt_wifi_DataPack(ESP12_AT_ATE,&i);
 				mt_wifi_DataPack(ESP12_AT_CWMODE,&i);
 				mt_wifi_DataPack(ESP12_AT_CWAUTOCONN,&i);
-				//mt_wifi_DataPack(ESP12_AT_CWSTARTSMART,&i);
-				WIFI_Sta = ESP12_STA_WIFISTA;
+				mt_wifi_changState(ESP12_STA_WIFISTA);
 			}
 		}
 			break;
@@ -454,20 +538,42 @@ static void hal_WifiTx_Pro(void)
 		}
 			break;
 
-		case ESP12_STA_GET_PASSWORD:
+		case ESP12_STA_WIFIConfig:
 		{
-			
+			QueueEmpty(Wifi_RxIdxMsg);
+			i = 0xff;
+			mt_wifi_DataPack(ESP12_AT_CWSTOPSMART,&i);
+			mt_wifi_DataPack(ESP12_AT_CWSTARTSMART,&i);
+			mt_wifi_changState(ESP12_STA_WIFIConfig_Wait);
 		}
 			break;
 
-		case ESP12_STA_GET_SMART_WIFINFO:
+		case ESP12_STA_WIFIConfig_Wait:    	
 		{
-			
+			Time_Delay_WifiSta++;
+			if (Time_Delay_WifiSta > 6000)
+			{
+				mt_wifi_changState(ESP12_STA_GETING_FAIL);
+			}			
 		}
 			break;
 
+		case ESP12_STA_GETING_FAIL:
 		case ESP12_STA_GETING_SUC:
-		{
+		{//无论配网成功还是失败，都要发送CWSTOPSMART来节省模块的资源
+		 //等待100MS再重新获取WIFI联网状态
+			static unsigned char Get_FailORSuc = 0;
+			Get_FailORSuc++;
+			if (Get_FailORSuc > 10)
+			{
+				QueueEmpty(Wifi_RxIdxMsg);
+				Get_FailORSuc = 0;
+				Time_Delay_WifiSta = 0;
+				i = 0xff;
+				mt_wifi_DataPack(ESP12_AT_CWSTOPSMART,&i);
+				mt_wifi_changState(ESP12_STA_WIFISTA);
+			}
+			
 			
 		}
 			break;
@@ -503,6 +609,9 @@ void mt_wifi_init(void)
 	memset(&WIFI_RxBuff[0], 0, sizeof(WIFI_RXBUFFSIZE_MAX));
 
 	WIFI_Sta = ESP12_STA_WIFI_POWER;	
+	WIFI_NetSta.WIFI_Net_Sta = ESP12_LINK_FAIL;
+	memset(WIFI_NetSta.WIFI_SSid, 0, sizeof(WIFI_NetSta.WIFI_SSid));
+	
 }
 
 

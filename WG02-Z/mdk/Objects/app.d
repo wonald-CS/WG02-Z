@@ -7,3 +7,4 @@
 .\objects\app.o: ..\mt\mt_tftlcd.h
 .\objects\app.o: ..\mt\mt_lora.h
 .\objects\app.o: ..\mt\lcdfont.h
+.\objects\app.o: ..\mt\mt_wifi.h

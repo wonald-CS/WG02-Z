@@ -6,7 +6,7 @@
 #include "mt_tftlcd.h"
 #include "mt_lora.h"
 #include "lcdfont.h"
-
+#include "mt_wifi.h"
 
 
 static void temHum_icon_Display(unsigned char fuc);
@@ -17,7 +17,7 @@ static str_LoraAppNetState stgMenu_LoraDetectorApplyNetPro(en_lora_eventTypedef 
 static unsigned char str_lora_loracommPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
 void app_task_init(void)
 {
-	//hal_KeyScanCBSRegister(KeyEventHandle); 
+	hal_KeyScanCBSRegister(KeyEventHandle); 
 	mt_loraRxApplyNet_callback_Register(stgMenu_LoraDetectorApplyNetPro);
 	mt_lora_loracomm_callback_Register(str_lora_loracommPro);
 }
@@ -96,6 +96,7 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 	  {
 			case KEY0:
 			{
+				mt_wifi_changState(ESP12_STA_WIFIConfig);
 				LCD_ShowString(200,40,"KEY0",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
 			}
 			break;
