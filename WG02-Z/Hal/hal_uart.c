@@ -382,6 +382,7 @@ void USART3_IRQHandler(void)
 		{
 			Uart3DateRxCBS(dat);
 		}
+		USART1_PutInDebugString(&dat,1);
 		
 	}
 }

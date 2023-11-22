@@ -12,6 +12,8 @@ unsigned char WIFI_TxQueuePos;             		//下一条发送数据所在数组
 unsigned char WIFI_TxBuff[WIFI_TX_QUEUE_SUM][WIFI_TX_BUFFSIZE_MAX];
 unsigned char WIFI_RxBuff[WIFI_RXBUFFSIZE_MAX];
 
+en_Esp12_sta WIFI_Sta;
+
 const char ESP12_AT[ESP12_AT_MAX][ESP12_AT_LEN]=
 {
 	"AT+RST",
@@ -49,6 +51,59 @@ const unsigned char ESP12_AT_ResPonse[ESP12_AT_RESPONSE_MAX][27]=
 };
 
 
+
+///////////////////////////////////////////////////
+
+/*******************************************************************************************
+*@description:WIFI模块外电或电源接入
+*@param[in]：fuc：复位或者空闲
+*@return：无
+*@others： 1. 如果没电断电的情况i下， 关闭WIFI电源   2. 电源复位操作
+********************************************************************************************/
+static unsigned char mt_wifi_PowerManage(en_wifiPowerManageSta fuc)
+{
+	static unsigned short StartTime = 2000;
+	if(hal_Gpio_AcStateCheck() == STA_AC_LINK)
+	{///USB 外部供电的情况下 
+		if(fuc == STA_WIFI_POWER_RESET)
+		{//Close WIFI Power
+			StartTime = 0;	
+			WIFI_Sta = ESP12_STA_WIFI_POWER;
+		}
+        if(StartTime == 0)
+		{
+			mt_wifi_init();
+			hal_GPIO_WIFIPowerEN_H();
+		}
+		if(StartTime < 1000)
+		{
+			StartTime ++;
+			if(StartTime > 150)
+			{
+				StartTime = 2000;
+				hal_GPIO_WIFIPowerEN_L();
+			}
+			return 0;
+		}	
+		return 1;
+	}
+	else
+	{// 电池供电  关闭WIFI 功能
+		StartTime = 0;
+		WIFI_Sta = ESP12_STA_WIFI_POWER;
+		hal_GPIO_WIFIPowerEN_H();
+		return 0;
+	}
+}
+
+
+
+/*******************************************************************************************
+*@description:WIFI数据入列
+*@param[in]：
+*@return：无
+*@others：
+********************************************************************************************/
 static void mt_wifi_RxMsgInput(unsigned char dat)
 {	
 	QueueDataIn(Wifi_RxIdxMsg,&dat,1);
@@ -182,7 +237,7 @@ unsigned char WIFI_RxMsg_Analysis(unsigned char *pData,unsigned char *res,unsign
 
 
 /*******************************************************************************************
-*@description:处理已解析完成的接收数据
+*@description:处理已解析完成的接收数据，执行相应动作
 *@param[in]：*pData：WIFI_RxBuff[0],  res:接收的数据的枚举值, strlon：接收数据长度
 *@return：
 *@others：
@@ -217,7 +272,11 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 		break;
 		case ESP12_AT_RESPONSE_OK:
 		{
-		
+			if(WIFI_Sta == ESP12_STA_WIFI_POWER)
+			{
+				WIFI_Sta = ESP12_STA_INIT;
+			}
+			
 		}
 		break; 
 		case ESP12_AT_RESPONSE_CWLAP:
@@ -315,18 +374,8 @@ static void hal_WifiTx_Pro(void)
 {
 	unsigned char Idx,i;
 	static unsigned int Time_Delay_WifiSent = 0; ////发送AT指令间隔延时时间
- 	static unsigned int Time_Delay_WifiSta = 0;
+	static unsigned int Time_Delay_WifiSta = 0;
 
-	//组包
-	Time_Delay_WifiSta ++;
-	if(Time_Delay_WifiSta > 200)
-	{	
-		Time_Delay_WifiSta = 0;
-		i = 0xff;
-		mt_wifi_DataPack(ESP12_AT_AT,&i);
-		mt_wifi_DataPack(ESP12_AT_ATE,&i);
-		//mt_wifi_DataPack(ESP12_AT_CWSTATE,&i);		
-	}
 
 	//发送
 	if(QueueDataLen(Wifi_TxIdxMsg))
@@ -340,7 +389,101 @@ static void hal_WifiTx_Pro(void)
 		}
 	}
 
-	
+	switch (WIFI_Sta)
+	{
+		case ESP12_STA_RESET:
+		{
+			Time_Delay_WifiSta ++;
+			if(Time_Delay_WifiSta > 200)
+			{
+				i = 0xFF;
+				Time_Delay_WifiSta = 0;
+				mt_wifi_DataPack(ESP12_STA_RESET,&i);
+				WIFI_Sta = ESP12_STA_WIFI_POWER;
+			}
+		}
+			break;
+
+		case ESP12_STA_WIFI_POWER:
+		{
+			Time_Delay_WifiSta ++;
+			if (Time_Delay_WifiSta > 300)
+			{
+				Time_Delay_WifiSta = 0;
+				i = 0xff;
+				mt_wifi_DataPack(ESP12_AT_AT,&i);
+				//WIFI_Sta = ESP12_STA_INIT;				
+			}
+		}
+			break;
+
+
+		case ESP12_STA_INIT:
+		{
+			Time_Delay_WifiSta ++;
+			if (Time_Delay_WifiSta > 200)
+			{
+				i = 0xff;
+				mt_wifi_DataPack(ESP12_AT_ATE,&i);
+				mt_wifi_DataPack(ESP12_AT_CWMODE,&i);
+				mt_wifi_DataPack(ESP12_AT_CWAUTOCONN,&i);
+				//mt_wifi_DataPack(ESP12_AT_CWSTARTSMART,&i);
+				WIFI_Sta = ESP12_STA_WIFISTA;
+			}
+		}
+			break;
+
+		case ESP12_STA_WIFISTA:
+		{
+			static unsigned char WIFI_Sta_Count = 0;
+			Time_Delay_WifiSta ++;
+			if (Time_Delay_WifiSta > 300)
+			{
+				WIFI_Sta_Count++;
+				Time_Delay_WifiSta = 0;
+				i = 0xff;
+				mt_wifi_DataPack(ESP12_AT_CWSTATE,&i);
+				if (WIFI_Sta_Count > 5)
+				{
+					WIFI_Sta_Count = 0;	
+					mt_wifi_PowerManage(STA_WIFI_POWER_RESET);					
+					//mt_wifi_DataPack(ESP12_AT_RESET,&i);	
+					//WIFI_Sta = ESP12_STA_RESET;
+				}
+			}
+		}
+			break;
+
+		case ESP12_STA_GET_PASSWORD:
+		{
+			
+		}
+			break;
+
+		case ESP12_STA_GET_SMART_WIFINFO:
+		{
+			
+		}
+			break;
+
+		case ESP12_STA_GETING_SUC:
+		{
+			
+		}
+			break;
+
+		case ESP12_STA_DETEC_READY:
+		{
+			
+		}
+			break;
+		
+		case ESP12_STA_UP_ALARMDAT:
+		{
+			
+		}
+			break;
+	}
 
 }
 
@@ -357,14 +500,19 @@ void mt_wifi_init(void)
 	{
 		memset(&WIFI_TxBuff[i], 0, sizeof(WIFI_TxBuff[i]));
 	}	
-	memset(&WIFI_RxBuff[0], 0, sizeof(WIFI_RXBUFFSIZE_MAX));	
+	memset(&WIFI_RxBuff[0], 0, sizeof(WIFI_RXBUFFSIZE_MAX));
+
+	WIFI_Sta = ESP12_STA_WIFI_POWER;	
 }
 
 
 void mt_wifi_pro(void)
 {
-	hal_WifiRx_Pro();
-	hal_WifiTx_Pro();
+	if(mt_wifi_PowerManage(STA_WIFI_POWER_IDLE))
+	{
+		hal_WifiRx_Pro();
+		hal_WifiTx_Pro();
+	}
 }
 
 
