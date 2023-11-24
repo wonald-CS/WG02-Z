@@ -1,6 +1,7 @@
 #include "hal_task.h"
 #include "mt_task.h"
 #include "app.h"
+#include "para.h"
 
 #include "OS_System.h"
 #include "CPU.h"
@@ -10,6 +11,7 @@ int main(void)
 {
 	hal_CPUInit();
 	OS_TaskInit();
+	ParaInit();
 	
 	hal_task_init();	
 	OS_CreatTask(OS_TASK1,hal_task,1,OS_RUN);	

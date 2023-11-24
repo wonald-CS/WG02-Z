@@ -4,15 +4,16 @@
 #include "mt_lora.h"
 #include "mt_wifi.h"
 #include "mt_4g.h"
+#include "mt_mqtt.h"
 
 void mt_task_init(void)
 {
 	mt_flashInit();
 	mt_tftlcd_init();
-  mt_lora_init();
+  	mt_lora_init();
 	mt_wifi_init();
-	mt_4g_Init();
-	
+	mt_4g_Init();	
+	mt_mqtt_init();
 }
 
 void mt_task(void)

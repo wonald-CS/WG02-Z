@@ -508,6 +508,16 @@
               <FileType>1</FileType>
               <FilePath>..\mt\mt_4G.c</FilePath>
             </File>
+            <File>
+              <FileName>mt_MD5.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mt\mt_MD5.c</FilePath>
+            </File>
+            <File>
+              <FileName>mt_mqtt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mt\mt_mqtt.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -517,6 +527,11 @@
               <FileName>app.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\app.c</FilePath>
+            </File>
+            <File>
+              <FileName>para.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\para.c</FilePath>
             </File>
           </Files>
         </Group>

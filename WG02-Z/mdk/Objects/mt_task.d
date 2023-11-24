@@ -5,3 +5,4 @@
 .\objects\mt_task.o: ..\mt\mt_lora.h
 .\objects\mt_task.o: ..\mt\mt_wifi.h
 .\objects\mt_task.o: ..\mt\mt_4g.h
+.\objects\mt_task.o: ..\mt\mt_mqtt.h

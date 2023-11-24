@@ -94,3 +94,46 @@ unsigned int SeekSrting(unsigned char *str1,unsigned char *str2,unsigned int st1
 	}
 	return 0xff;
 }
+
+
+/*******************************************************************************************
+*@description:HEX转换Ascii值
+*@param[in]：*HexDat：HEX数据，*ascDtt：转换后的Ascii数据，len：长度
+*@return：
+*@others：
+********************************************************************************************/
+void StringhexToAsciiConversion(unsigned char *HexDat,unsigned char *ascDtt,unsigned int len)
+{
+	  unsigned int lenx;
+	  unsigned char temp;
+	  unsigned char datah,datal;
+	  lenx = len;
+		while(lenx)
+		{
+			lenx--;
+			temp = *HexDat;
+			if((temp & 0x0f) < 0x0A)
+			{
+				datal	= ('0' + (temp & 0x0f));
+			}
+			else
+			{
+				datal	= ('a'+(temp & 0x0f) - 10);
+			}
+			temp >>= 4;	
+			if((temp & 0x0f) < 0x0A)
+			{
+				datah	= ('0' + (temp & 0x0f));
+			}
+			else
+			{
+				datah	= ('a' + (temp & 0x0f) - 10);
+			}	
+			*ascDtt = datah;
+			ascDtt ++;
+			*ascDtt = datal;
+			ascDtt ++;
+			
+			HexDat ++;	
+		}		
+}

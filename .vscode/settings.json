@@ -8,6 +8,8 @@
         "mt_wifi.h": "c",
         "hal_tftlcd.h": "c",
         "hal_flash.h": "c",
-        "mt_api.h": "c"
+        "mt_api.h": "c",
+        "mt_4g.h": "c",
+        "mt_md5.h": "c"
     }
 }

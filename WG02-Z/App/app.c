@@ -96,7 +96,7 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 	  {
 			case KEY0:
 			{
-				mt_wifi_changState(ESP12_STA_WIFIConfig);
+				//mt_wifi_changState(ESP12_STA_WIFIConfig);
 				LCD_ShowString(200,40,"KEY0",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
 			}
 			break;

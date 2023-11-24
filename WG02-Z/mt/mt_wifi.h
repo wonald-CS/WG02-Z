@@ -1,5 +1,5 @@
-#ifndef ____HAL_WIFI_H_
-#define ____HAL_WIFI_H_
+#ifndef ____MT_WIFI_H_
+#define ____MT_WIFI_H_
 
 
 #define ESP12_AT_LEN 70

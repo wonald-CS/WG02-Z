@@ -575,7 +575,7 @@ static void hal_WifiTx_Pro(void)
 			}
 			
 			
-		}
+		} 
 			break;
 
 		case ESP12_STA_DETEC_READY:
