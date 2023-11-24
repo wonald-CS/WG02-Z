@@ -82,15 +82,15 @@ static void temHum_icon_Display(unsigned char fuc)
 
 static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 {//00-15
-		unsigned char keysta[3];
-    keysta[0] = keys/10 + 0x30;
-	  keysta[1] = keys%10 + 0x30;
-	  keysta[2] = 0;
+	unsigned char keysta[3];
+	keysta[0] = keys/10 + 0x30;
+	keysta[1] = keys%10 + 0x30;
+	keysta[2] = 0;
 	
     LCD_ShowString(0,40,"KEYDBC:",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
-	  LCD_ShowString(80,40,keysta,HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+	LCD_ShowString(80,40,keysta,HUE_LCD_FONT,HUE_LCD_BACK,24,0);
 	
-	  LCD_ShowString(120,40,"-KEY-:",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+	LCD_ShowString(120,40,"-KEY-:",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
 	
 	  switch((unsigned char)keys)
 	  {

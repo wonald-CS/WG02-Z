@@ -167,8 +167,8 @@ void MD5Transform(unsigned int state[4],unsigned char block[64])
 
 
 //加盐算法: "password{user@scmp}\0";      
-//38FFFFFF3032533551310743{38FFFFFF3032533551310743@scmp}
-
+//38FFD8055642363436310443{38FFD8055642363436310443@scmp}
+//MD5密码：8CA1A761DE033CBAC86B9AFDCC7BF744
 /*******************************************************************************************
 *@description:MD5加密
 *@param[in]：username[]：MQTT用户名称，PassWordBuf[]：MQTT用户密码，*md5PassWord：加密后密码

@@ -153,20 +153,10 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>WIFI_NetSta</ItemText>
-        </Ww>
-        <Ww>
-          <count>1</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>buf</ItemText>
-        </Ww>
-        <Ww>
-          <count>2</count>
-          <WinNumber>1</WinNumber>
           <ItemText>mqtt_para</ItemText>
         </Ww>
         <Ww>
-          <count>3</count>
+          <count>1</count>
           <WinNumber>1</WinNumber>
           <ItemText>STM32_UID</ItemText>
         </Ww>
