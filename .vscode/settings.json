@@ -10,6 +10,7 @@
         "hal_flash.h": "c",
         "mt_api.h": "c",
         "mt_4g.h": "c",
-        "mt_md5.h": "c"
+        "mt_md5.h": "c",
+        "mt_mqtt.h": "c"
     }
 }

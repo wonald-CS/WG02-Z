@@ -17,7 +17,7 @@ static str_LoraAppNetState stgMenu_LoraDetectorApplyNetPro(en_lora_eventTypedef 
 static unsigned char str_lora_loracommPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
 void app_task_init(void)
 {
-	hal_KeyScanCBSRegister(KeyEventHandle); 
+	//hal_KeyScanCBSRegister(KeyEventHandle); 
 	mt_loraRxApplyNet_callback_Register(stgMenu_LoraDetectorApplyNetPro);
 	mt_lora_loracomm_callback_Register(str_lora_loracommPro);
 }
