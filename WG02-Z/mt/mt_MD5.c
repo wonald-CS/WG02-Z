@@ -178,35 +178,35 @@ void MD5Transform(unsigned int state[4],unsigned char block[64])
 void mt_md5_EncipherPassWord(char username[],char PassWordBuf[],unsigned char *md5PassWord)
 {
 	int read_len,idx,i;
-	char wuji[40];
+	char buf[40];
 	char Passbuff[64];  ///
 	unsigned char GetPassWord[32];
 	idx = 0;
 	i = 0;
-	wuji[idx ++] = '{';
+	buf[idx ++] = '{';
 	for(;;)
 	{
 		if(username[i])
 		{
-			wuji[idx++] = username[i++];	
+			buf[idx++] = username[i++];	
 		}
 		else 
 			break;
 		if(i>30)
 			break;
 	}
-	wuji[idx ++] = '@';
-	wuji[idx ++] = 's';
-	wuji[idx ++] = 'c';
-	wuji[idx ++] = 'm';	
-	wuji[idx ++] = 'p';		
-	wuji[idx ++] = '}';
-	wuji[idx ++] = 0;
+	buf[idx ++] = '@';
+	buf[idx ++] = 's';
+	buf[idx ++] = 'c';
+	buf[idx ++] = 'm';	
+	buf[idx ++] = 'p';		
+	buf[idx ++] = '}';
+	buf[idx ++] = 0;
 	memset(Passbuff,0,64); 
 	strcat(Passbuff,PassWordBuf);
-    //Passbuff[]="38FFFFFF3032533551310743"
-	strcat(Passbuff,wuji);  
-    //Passbuff[]="38FFFFFF3032533551310743{38FFFFFF3032533551310743@scmp}"
+    //Passbuff[]="38FFD8055642363436310443"
+	strcat(Passbuff,buf);  
+    //Passbuff[]="38FFD8055642363436310443{38FFD8055642363436310443@scmp}"
 	MD5Init(&md5c); 
 	read_len = strlen(Passbuff);
 	MD5Update(&md5c,(unsigned char *)Passbuff,read_len); 	        
