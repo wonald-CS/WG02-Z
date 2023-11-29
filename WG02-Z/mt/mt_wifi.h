@@ -10,6 +10,16 @@
 #define WIFI_RXBUFFSIZE_MAX		    	800
 
 
+typedef enum 
+{
+	STEP_MQTT_FREE,
+	STEP_MQTT_CONF,											//用户参数配置
+	STEP_MQTT_CONN,											//连接服务器
+	STEP_MQTT_SUB,											//订阅主题
+	STEP_MQTT_PUB,											//通过主题发布信息
+}WIFI_mqtt_step;
+
+
 enum
 {
 	ESP12_AT_RESET =0,
@@ -22,11 +32,11 @@ enum
 	ESP12_AT_CWSTATE,
 	ESP12_AT_CWLAP,	
 	
-	ESP12_AT_MQTTUSERCFG,// "AT+MQTTUSERCFG=0,1,\"", 
-	ESP12_AT_MQTTCONN,// "AT+MQTTCONN=0,\"",   
-	ESP12_AT_MQTTPUB,// "AT+MQTTPUB=0,\"",    
-	ESP12_AT_MQTTSUB,// "AT+MQTTSUB=0,\"",     
-	ESP12_AT_MQTTCLEAN,// "AT+MQTTCLEAN=0",    
+	ESP12_AT_MQTTUSERCFG,			// "AT+MQTTUSERCFG=0,1,\"", 
+	ESP12_AT_MQTTCONN,				// "AT+MQTTCONN=0,\"",   
+	ESP12_AT_MQTTPUB,				// "AT+MQTTPUB=0,\"",    
+	ESP12_AT_MQTTSUB,				// "AT+MQTTSUB=0,\"",     
+	ESP12_AT_MQTTCLEAN,				// "AT+MQTTCLEAN=0",    
 	ESP12_AT_MAX,
 };
 

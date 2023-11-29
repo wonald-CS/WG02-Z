@@ -509,14 +509,14 @@
               <FilePath>..\mt\mt_4G.c</FilePath>
             </File>
             <File>
-              <FileName>mt_MD5.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\mt\mt_MD5.c</FilePath>
-            </File>
-            <File>
               <FileName>mt_mqtt.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\mt\mt_mqtt.c</FilePath>
+            </File>
+            <File>
+              <FileName>mt_MD5.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\mt\mt_MD5.lib</FilePath>
             </File>
           </Files>
         </Group>

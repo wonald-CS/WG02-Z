@@ -137,3 +137,81 @@ void StringhexToAsciiConversion(unsigned char *HexDat,unsigned char *ascDtt,unsi
 			HexDat ++;	
 		}		
 }
+
+
+
+/*******************************************************************************************
+*@description:HEX转换Ascii值
+*@param[in]：dat：HEX数据
+*@return：
+*@others：
+********************************************************************************************/
+void hexToAsciiConversion(unsigned char dat,unsigned char *Hdat,unsigned char *Ldat)
+{
+		if((dat & 0x0f) < 0x0A)
+		{
+			*Ldat	= ('0' + (dat & 0x0f));
+		}
+		else
+		{
+			*Ldat	= ('A'+(dat & 0x0f) - 10);
+		}
+		
+		dat >>= 4;	
+		if((dat & 0x0f) < 0x0A)
+		{
+			*Hdat	= ('0' + (dat & 0x0f));
+		}
+		else
+		{
+			*Hdat	= ('A'+(dat & 0x0f) - 10);
+		}			
+}
+
+
+/*******************************************************************************************
+*@description:Ascii转换Hex值
+*@param[in]：*asciiDat：Ascii数据, asciiLen:数据长度，*hexDat：转换的Hex值
+*@return：
+*@others：
+********************************************************************************************/
+void asciiToHexConversion(unsigned char *asciiDat,unsigned char *hexDat,unsigned short asciiLen)
+{
+	unsigned char *pdata,len;
+	pdata = asciiDat;
+	len = asciiLen;
+	while(len)
+	{
+		*hexDat = 0;
+		if((*pdata >= '0') && (*pdata <= '9'))
+		{
+				*hexDat = (*pdata - '0') << 4;
+		}
+		else if((*pdata >= 'A') && (*pdata <= 'F')) 
+		{
+				*hexDat = (*pdata - 'A' + 10) << 4;
+		}
+		else if((*pdata >= 'a') && (*pdata <= 'f'))
+		{
+				*hexDat = (*pdata - 'a' + 10) << 4;
+		}	
+		pdata ++;
+		
+		if((*pdata >= '0') && (*pdata <= '9'))
+		{
+				*hexDat += (*pdata - '0');
+		}
+		else if((*pdata >= 'A') && (*pdata <= 'F')) 
+		{
+				*hexDat += (*pdata - 'A' + 10);
+		}
+		else if((*pdata >= 'a') && (*pdata <= 'f'))
+		{
+				*hexDat += (*pdata - 'a' + 10);
+		}		
+		
+		pdata ++;
+		hexDat ++;
+		len -= 2;
+	}
+}

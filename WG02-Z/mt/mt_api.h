@@ -4,4 +4,6 @@
 unsigned short mt_api_crc16(unsigned char *ptr, unsigned int len);
 unsigned int SeekSrting(unsigned char *str1,unsigned char *str2,unsigned int st1long);
 void StringhexToAsciiConversion(unsigned char *HexDat,unsigned char *ascDtt,unsigned int len);
+void hexToAsciiConversion(unsigned char dat,unsigned char *Hdat,unsigned char *Ldat);
+void asciiToHexConversion(unsigned char *asciiDat,unsigned char *hexDat,unsigned short asciiLen);
 #endif

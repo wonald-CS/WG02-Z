@@ -26,23 +26,12 @@ typedef struct
 }str_mqtt_Upevent;
 
 
-typedef enum 
-{
-	STA_MQTT_CLEAN=0,
-	STA_MQTT_CONF,
-	STA_MQTT_CONN,
-	STA_MQTT_SUB,
-	STA_MQTT_SUB_FIRMWARE_UPDATE,
-	STA_MQTT_READY,
-	STA_MQTT_PUB,
-	
-}en_mqtt_sta;
-
 typedef enum
 {
 	MQTT_REC_MESSAGE_NEW, 
 	MQTT_REC_MESSAGE_FREE,
 }en_mqtt_recNewFlag;
+
 
 typedef struct
 {
@@ -59,6 +48,7 @@ typedef struct
 extern str_mqtt_parameter  mqtt_para;
 
 void mt_mqtt_init(void);
+void mt_mqtt_SetNewFlag(en_mqtt_recNewFlag flag);
 
 #endif
 

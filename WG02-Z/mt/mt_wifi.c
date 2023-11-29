@@ -4,6 +4,7 @@
 #include "hal_Gpio.h"
 #include "string.h"
 #include "mt_api.h"
+#include "mt_mqtt.h"
 
 ///////注意：ESP8266只能配置2.4G频段的WIFI//////
 
@@ -13,10 +14,12 @@ volatile Queue16  Wifi_TxIdxMsg;
 unsigned char WIFI_TxQueuePos;             		//下一条发送数据所在数组位置
 unsigned char WIFI_TxBuff[WIFI_TX_QUEUE_SUM][WIFI_TX_BUFFSIZE_MAX];
 unsigned char WIFI_RxBuff[WIFI_RXBUFFSIZE_MAX];
+static unsigned char Resend_Time = 0;			//重发次数
 
 
 en_Esp12_sta WIFI_Sta;
 en_WIFI_NetSta WIFI_NetSta;
+WIFI_mqtt_step  MQTT_Step;
 
 
 const char ESP12_AT[ESP12_AT_MAX][ESP12_AT_LEN]=
@@ -59,6 +62,77 @@ const unsigned char ESP12_AT_ResPonse[ESP12_AT_RESPONSE_MAX][27]=
 	"+MQTTSUBRECV:0,\0",
 	"OK\r\n\0",           						//WIFI模块返回值OK
 };
+
+
+
+/*******************************************************************************************
+*@description:MQTT发布信息测试函数
+*@param[in]：*buf：mqttPubtDataTest[]
+*@return：无
+*@others：
+			//AT+MQTTPUB=0,"38FFFFFF3032533551310743_up","AA0006290000082755",2,0
+			//AT+MQTTPUB=0,\"
+********************************************************************************************/
+/*
+unsigned char mqttPubtDataTest[]={0,9,0xAA,0x00,0x06,0x29,0x00,0x00,0x08,0x27,0x55};
+void mt_wifi_Mqtt_SentDat(unsigned char *buf)
+{
+	unsigned char mqttDataBuff[WIFI_TX_BUFFSIZE_MAX];
+	unsigned char i,idx,hchar,lchar;
+	unsigned short lon;
+	
+	if((MQTT_Step == STEP_MQTT_PUB) && (WIFI_Sta == ESP12_STA_DETEC_READY))
+	{
+		idx	=0;
+		i = 0;
+		while(mqtt_para.pubtopic[i])
+		{
+			mqttDataBuff[idx ++] = mqtt_para.pubtopic[i++];
+			if(i == MQTT_TPIC_SIZE_MAX)
+			break;	
+		}
+		mqttDataBuff[idx ++] = '\"';			
+		mqttDataBuff[idx ++] = ',';	
+		mqttDataBuff[idx ++] = '\"';
+		lon = *buf<< 8; 
+		buf++;
+		lon += *buf;  
+		buf++;
+
+		while(lon--)
+		{
+			hexToAsciiConversion(*buf,&hchar,&lchar);
+			mqttDataBuff[idx++] = hchar;	
+			mqttDataBuff[idx++] = lchar;
+			buf ++;
+			if(idx >= (WIFI_TX_BUFFSIZE_MAX-6))
+				break;
+		}
+		mqttDataBuff[idx ++] = '\"';
+		mqttDataBuff[idx ++] = ',';	
+		mqttDataBuff[idx ++] = '2';
+		mqttDataBuff[idx ++] = ',';	
+		mqttDataBuff[idx ++] = '0';
+		mqttDataBuff[idx ++] = 0;
+		
+		mt_wifi_DataPack(ESP12_AT_MQTTPUB,&mqttDataBuff[0]);
+		mt_mqtt_SetNewFlag(MQTT_REC_MESSAGE_NEW);
+	}
+}
+*/
+
+
+/*******************************************************************************************
+*@description:MQTT步骤改变
+*@param[in]：step：改变的枚举值
+*@return：无
+*@others：
+********************************************************************************************/
+void mt_wifi_Mqtt_Step(WIFI_mqtt_step step)
+{
+	MQTT_Step = step;
+	QueueEmpty(Wifi_RxIdxMsg);
+}
 
 
 /*******************************************************************************************
@@ -113,6 +187,61 @@ static void mt_wifi_CwstateResposePro(unsigned char *p)
 }
 
 
+
+
+/*******************************************************************************************
+*@description:WIFI_MQTT的订阅主题接收到的信息处理
+*@param[in]：*p：WIFI_RxBuff;*Output:DataBuff;Len:数据长度
+*@return：处理后的信息的长度
+*@others：
+********************************************************************************************/
+void WIFI_MQTT_Sub_RecPro(unsigned char *p,unsigned char *OutPut,unsigned char *Lenth)
+{
+	//+MQTTSUBRECV:0,"38FFFFFF3032533551310743_down",30,AA000C2A0007E70B17040E1B07EA55
+	//处理:,30,AA~A55;
+	unsigned char *pdata;
+	unsigned char len = 0;
+
+	pdata = p;
+
+	while(*pdata != '"') 
+	{
+		pdata++;	
+	}
+	pdata++;
+
+	while(*pdata != '"')
+	{
+		pdata++;	
+	}			
+	pdata++;		// ,
+	pdata++;		// 3
+	
+	//记录数据长度
+	while(*pdata != ',')
+	{
+		if((*pdata >= '0') && (*pdata <= '9'))
+		{
+			len *= 10;
+			len += *pdata - '0';
+		}
+		pdata++;
+
+		// i++;
+		// if(i > 2)
+		// break;
+	}
+
+	*Lenth = len;
+
+
+	while(len--)
+	{
+		*OutPut = *pdata;
+		OutPut ++;
+		pdata++;	
+	}
+}
 
 /*******************************************************************************************
 *@description:WIFI模块外电或电源接入
@@ -297,6 +426,201 @@ unsigned char WIFI_RxMsg_Analysis(unsigned char *pData,unsigned char *res,unsign
 
 
 /*******************************************************************************************
+*@description:MQTT配置步骤
+*@param[in]：
+*@return：0：数据处理中； 0xff：空闲；
+*@others：
+********************************************************************************************/
+unsigned char Mqtt_Step_Pro(void)
+{
+	static unsigned short Time_Delay_MqttSent = 0;
+	unsigned char i,j;
+	unsigned char Mqtt_Buff[WIFI_TX_BUFFSIZE_MAX];
+	static unsigned char Flag = 1;
+	
+	switch (MQTT_Step)
+	{
+		case STEP_MQTT_FREE:
+			Time_Delay_MqttSent ++;
+			if (Time_Delay_MqttSent > 200)
+			{
+				memset(Mqtt_Buff,0,sizeof(Mqtt_Buff));
+				Mqtt_Buff[0] = 0xff;
+				Time_Delay_MqttSent = 0;
+				mt_wifi_DataPack(ESP12_AT_MQTTCLEAN,&Mqtt_Buff[0]);
+				mt_wifi_Mqtt_Step(STEP_MQTT_CONF);	
+				return 0;		
+			}
+			
+			break;
+		
+		case STEP_MQTT_CONF:
+			Time_Delay_MqttSent ++;
+			i = 0;
+			j = 0;
+			if (Time_Delay_MqttSent > 300)
+			{
+				Time_Delay_MqttSent = 0;
+				while (mqtt_para.linkID[j])
+				{
+					Mqtt_Buff[i++] = mqtt_para.linkID[j++]; 
+					if(j == MQTT_LINKID_SIZE_MAX)
+					{
+						break;
+					}
+				}
+				//连发9次都失败就重启WIFI模块
+				if(mqtt_para.linkID[0] == 0x30)
+				{
+					mqtt_para.linkID[0] += 1;
+				}else{
+					if(mqtt_para.linkID[0] >= 0x39)
+					{
+						mt_wifi_PowerManage(STA_WIFI_POWER_RESET);	
+						mqtt_para.linkID[0] = 0x30;	
+					}
+					mqtt_para.linkID[0] += 1;					
+				}
+
+
+				Mqtt_Buff[i++] = '\"';
+				Mqtt_Buff[i++] = ',';
+				Mqtt_Buff[i++] = '\"';
+				j = 0;
+
+				while (mqtt_para.username[j])
+				{
+					Mqtt_Buff[i++] = mqtt_para.username[j++]; 
+					if(j == MQTT_USERNAME_SIZE_MAX)
+					{
+						break;
+					}
+				}
+
+				Mqtt_Buff[i++] = '\"';
+				Mqtt_Buff[i++] = ',';
+				Mqtt_Buff[i++] = '\"';
+				j = 0;
+
+				while (mqtt_para.password[j])
+				{
+					Mqtt_Buff[i++] = mqtt_para.password[j++]; 
+					if(j == MQTT_PASSWORD_SIZE_MAX)
+					{
+						break;
+					}
+				}	
+				Mqtt_Buff[i++] = '\"';
+				Mqtt_Buff[i++] = ',';
+				Mqtt_Buff[i++] = '0';		
+				Mqtt_Buff[i++] = ',';	
+				Mqtt_Buff[i++] = '0';	
+				Mqtt_Buff[i++] = ',';
+				Mqtt_Buff[i++] = '\"';
+				Mqtt_Buff[i++] = '\"';
+				Mqtt_Buff[i++] = 0;
+
+				mt_wifi_DataPack(ESP12_AT_MQTTUSERCFG,&Mqtt_Buff[0]);
+				memset(Mqtt_Buff,0,sizeof(Mqtt_Buff));
+				Resend_Time = 0;
+				return 0;		
+			}
+			break;
+
+		case STEP_MQTT_CONN:
+			Time_Delay_MqttSent ++;
+			i = 0;
+			j = 0;
+			if (Time_Delay_MqttSent > 300)
+			{
+				Time_Delay_MqttSent = 0;
+				//如果超过3次MQTT连接没有接收到应答OK，则复位WIFI。
+				if (Resend_Time > 3)
+				{
+					Resend_Time = 0;
+					mt_wifi_PowerManage(STA_WIFI_POWER_RESET);  ///WIFI 复位
+					return 0;
+				}
+				
+				while (mqtt_para.serverIp[j])
+				{
+					Mqtt_Buff[i++] = mqtt_para.serverIp[j++]; 
+					if(j == MQTT_SERVERIP_SIZE_MAX)
+					{
+						break;
+					}
+				}
+
+				Mqtt_Buff[i++] = '\"';
+				Mqtt_Buff[i++] = ',';
+				j = 0;
+
+				while (mqtt_para.serverPort[j])
+				{
+					Mqtt_Buff[i++] = mqtt_para.serverPort[j++]; 
+					if(j == MQTT_SERVERPORT_SIZE_MAX)
+					{
+						break;
+					}
+				}
+
+				Mqtt_Buff[i++] = ',';
+				Mqtt_Buff[i++] = '0';
+				Mqtt_Buff[i++] = 0;
+
+				mt_wifi_DataPack(ESP12_AT_MQTTCONN,&Mqtt_Buff[0]);
+				memset(Mqtt_Buff,0,sizeof(Mqtt_Buff));
+				return 0;		
+			}
+			break;
+
+		case STEP_MQTT_SUB:
+			Time_Delay_MqttSent ++;
+			i = 0;
+			j = 0;
+			if (Time_Delay_MqttSent > 200)
+			{
+				Time_Delay_MqttSent = 0;
+				
+				while (mqtt_para.subtopic[j])
+				{
+					Mqtt_Buff[i++] = mqtt_para.subtopic[j++]; 
+					if(j == MQTT_TPIC_SIZE_MAX)
+					{
+						break;
+					}
+				}
+
+				Mqtt_Buff[i++] = '\"';
+				Mqtt_Buff[i++] = ',';
+				Mqtt_Buff[i++] = '0';
+				Mqtt_Buff[i++] = 0;
+
+				mt_wifi_DataPack(ESP12_AT_MQTTSUB,&Mqtt_Buff[0]);
+				memset(Mqtt_Buff,0,sizeof(Mqtt_Buff));
+				return 0;		
+			}
+			break;
+
+		case STEP_MQTT_PUB:
+			Time_Delay_MqttSent	++;
+			if(Time_Delay_MqttSent > 300)
+			{
+				if (Flag == 1)
+				{
+					//mt_wifi_Mqtt_SentDat(mqttPubtDataTest);
+					Flag = 0;
+				}
+				
+
+			}
+			break;
+	}
+	return 0xff;
+}
+
+
+/*******************************************************************************************
 *@description:处理已解析完成的接收数据，执行相应动作
 *@param[in]：*pData：WIFI_RxBuff[0],  res:接收的数据的枚举值, strlon：接收数据长度
 *@return：
@@ -304,6 +628,8 @@ unsigned char WIFI_RxMsg_Analysis(unsigned char *pData,unsigned char *res,unsign
 ********************************************************************************************/
 static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res,unsigned short strlon)
 {
+  	static unsigned char len;
+	static unsigned char hexDataBuff[WIFI_RXBUFFSIZE_MAX],DataBuff[WIFI_RXBUFFSIZE_MAX];
 	switch((unsigned char)res)
 	{
 		case ESP12_AT_RESPONSE_WIFI_CONNECTED:
@@ -324,7 +650,7 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 			mt_wifi_CwstateResposePro(pData);
 			if (WIFI_NetSta.WIFI_Net_Sta == ESP12_LINK_SUC)
 			{
-				mt_wifi_changState(ESP12_STA_DETEC_READY);
+				mt_wifi_changState(ESP12_STA_DETEC_READY);		//WIFI配网成功，进行MQTT配置
 			}else
 			{
 				mt_wifi_changState(ESP12_STA_WIFISTA);
@@ -342,6 +668,7 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 
 		case ESP12_AT_RESPONSE_ERROR:
 		{
+			
 		}
 		break;
 
@@ -350,6 +677,18 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 			if(WIFI_Sta == ESP12_STA_WIFI_POWER)
 			{
 				mt_wifi_changState(ESP12_STA_INIT);
+			}else if(WIFI_Sta == ESP12_STA_DETEC_READY)
+			{
+				if(MQTT_Step == STEP_MQTT_CONF)
+				{
+					mt_wifi_Mqtt_Step(STEP_MQTT_CONN);
+				}else if (MQTT_Step == STEP_MQTT_CONN)
+				{
+					mt_wifi_Mqtt_Step(STEP_MQTT_SUB);
+				}else if (MQTT_Step == STEP_MQTT_SUB)
+				{
+					mt_wifi_Mqtt_Step(STEP_MQTT_PUB);
+				}	
 			}
 			
 		}
@@ -372,24 +711,32 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 			if (WIFI_Sta == ESP12_STA_WIFIConfig_Wait)
 			{
 				mt_wifi_changState(ESP12_STA_GETING_SUC);
-			}			
+			}
 		}
 		break;	
 
 		case ESP12_AT_RESPONSE_MQTTCONN://	"+MQTTCONNECTED:0\0",
 		{
-			
+			Resend_Time = 0;
+			mt_wifi_Mqtt_Step(STEP_MQTT_SUB);
 		}
 		break;
 
 		case ESP12_AT_RESPONSE_MQTTDISCONN:
 		{
+			Resend_Time++;
 		}
 		break;
 
 		case ESP12_AT_RESPONSE_MQTTRECV://"+MQTTSUBRECV:0,\0",
 		{
-			  
+			WIFI_MQTT_Sub_RecPro(pData,DataBuff,&len);
+			if(!(len % 2))
+			{
+				asciiToHexConversion(DataBuff,hexDataBuff,len);				
+				//mt_protocol_WIFIMqttRecHandle(&hexDataBuff[0],len/2);
+			}
+			mt_mqtt_SetNewFlag(MQTT_REC_MESSAGE_NEW);		
 		}
 		break;
 	}
@@ -399,21 +746,6 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 //接收测试函数
 static void hal_WifiRx_Pro(void)
 {
-//	unsigned char len,i;
-//	unsigned char rxbuffer[20];
-//	
-//	len = QueueDataLen(Wifi_RxIdxMsg);
-//	if(len> 3)
-//	{
-//		if(len>=20)
-//		len = 20;
-//		for(i=0;i<len;i++)
-//		{
-//			QueueDataOut(Wifi_RxIdxMsg,&rxbuffer[i]);		
-//		}
-//		USART1_PutInDebugString(rxbuffer,len); 			
-//	}
-	
 	en_esp12_atResponse response;
 	static unsigned short Rx_Data_len = 0;	
 	unsigned char StrAddr,Ret;
@@ -527,10 +859,11 @@ static void hal_WifiTx_Pro(void)
 				Time_Delay_WifiSta = 0;
 				i = 0xff;
 				mt_wifi_DataPack(ESP12_AT_CWSTATE,&i);
-				if (WIFI_Sta_Count > 5)
+				if (WIFI_Sta_Count > 10)
 				{
 					WIFI_Sta_Count = 0;	
-					mt_wifi_PowerManage(STA_WIFI_POWER_RESET);					
+					mt_wifi_PowerManage(STA_WIFI_POWER_RESET);	
+					return;				
 					//mt_wifi_DataPack(ESP12_AT_RESET,&i);	
 					//WIFI_Sta = ESP12_STA_RESET;
 				}
@@ -580,6 +913,11 @@ static void hal_WifiTx_Pro(void)
 
 		case ESP12_STA_DETEC_READY:
 		{
+			//WIFI配网成功后再配置MQTT
+			if (!Mqtt_Step_Pro())
+			{
+				
+			}
 			
 		}
 			break;
@@ -611,6 +949,7 @@ void mt_wifi_init(void)
 	WIFI_Sta = ESP12_STA_WIFI_POWER;	
 	WIFI_NetSta.WIFI_Net_Sta = ESP12_LINK_FAIL;
 	memset(WIFI_NetSta.WIFI_SSid, 0, sizeof(WIFI_NetSta.WIFI_SSid));
+	MQTT_Step = STEP_MQTT_FREE;
 	
 }
 

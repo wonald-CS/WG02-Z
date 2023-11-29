@@ -347,21 +347,21 @@ void I2C_PageWrite(unsigned short address,unsigned char *pDat, unsigned short nu
 	}
 }
 
-static void hal_eeprom_test(void)
-{
-	unsigned char eepromTestWriteBuffer[500];
-	unsigned char eepromTestReadBuffer[500];
-	unsigned short i;
-	I2C_Read(250,eepromTestReadBuffer,500);
-	
-  for(i=0;i<500;i++)
-	{
-		eepromTestWriteBuffer[i] = i;
-		eepromTestReadBuffer[i]=0xff;
-	}
-	I2C_PageWrite(250,eepromTestWriteBuffer,500);	
-	I2C_Read(250,eepromTestReadBuffer,500);
-}
+//static void hal_eeprom_test(void)
+//{
+//	unsigned char eepromTestWriteBuffer[500];
+//	unsigned char eepromTestReadBuffer[500];
+//	unsigned short i;
+//	I2C_Read(250,eepromTestReadBuffer,500);
+//	
+//  for(i=0;i<500;i++)
+//	{
+//		eepromTestWriteBuffer[i] = i;
+//		eepromTestReadBuffer[i]=0xff;
+//	}
+//	I2C_PageWrite(250,eepromTestWriteBuffer,500);	
+//	I2C_Read(250,eepromTestReadBuffer,500);
+//}
 
  void hal_eepromInit(void)
 {
