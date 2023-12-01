@@ -5,8 +5,10 @@
 #include "string.h"
 #include "mt_api.h"
 #include "mt_mqtt.h"
+#include "mt_protocol.h"
 
 ///////注意：ESP8266只能配置2.4G频段的WIFI//////
+void mt_wifi_DataPack(unsigned char cmd,unsigned char *pdata);
 
 volatile Queue1K  Wifi_RxIdxMsg;			
 volatile Queue16  Wifi_TxIdxMsg;	
@@ -64,22 +66,19 @@ const unsigned char ESP12_AT_ResPonse[ESP12_AT_RESPONSE_MAX][27]=
 };
 
 
-
 /*******************************************************************************************
-*@description:MQTT发布信息测试函数
-*@param[in]：*buf：mqttPubtDataTest[]
+*@description:MQTT发布信息函数
+*@param[in]：*buf：传入的数据（前2位为数据长度）
 *@return：无
 *@others：
 			//AT+MQTTPUB=0,"38FFFFFF3032533551310743_up","AA0006290000082755",2,0
 			//AT+MQTTPUB=0,\"
 ********************************************************************************************/
-/*
-unsigned char mqttPubtDataTest[]={0,9,0xAA,0x00,0x06,0x29,0x00,0x00,0x08,0x27,0x55};
 void mt_wifi_Mqtt_SentDat(unsigned char *buf)
 {
 	unsigned char mqttDataBuff[WIFI_TX_BUFFSIZE_MAX];
 	unsigned char i,idx,hchar,lchar;
-	unsigned short lon;
+	unsigned short lon;					//传入数据的前2位为数据长度
 	
 	if((MQTT_Step == STEP_MQTT_PUB) && (WIFI_Sta == ESP12_STA_DETEC_READY))
 	{
@@ -119,7 +118,6 @@ void mt_wifi_Mqtt_SentDat(unsigned char *buf)
 		mt_mqtt_SetNewFlag(MQTT_REC_MESSAGE_NEW);
 	}
 }
-*/
 
 
 /*******************************************************************************************
@@ -433,10 +431,9 @@ unsigned char WIFI_RxMsg_Analysis(unsigned char *pData,unsigned char *res,unsign
 ********************************************************************************************/
 unsigned char Mqtt_Step_Pro(void)
 {
-	static unsigned short Time_Delay_MqttSent = 0;
+	static unsigned int Time_Delay_MqttSent = 0;
 	unsigned char i,j;
 	unsigned char Mqtt_Buff[WIFI_TX_BUFFSIZE_MAX];
-	static unsigned char Flag = 1;
 	
 	switch (MQTT_Step)
 	{
@@ -604,15 +601,11 @@ unsigned char Mqtt_Step_Pro(void)
 
 		case STEP_MQTT_PUB:
 			Time_Delay_MqttSent	++;
-			if(Time_Delay_MqttSent > 300)
+			if(Time_Delay_MqttSent > 500)  //半小时同步一次
 			{
-				if (Flag == 1)
-				{
-					//mt_wifi_Mqtt_SentDat(mqttPubtDataTest);
-					Flag = 0;
-				}
-				
-
+				Time_Delay_MqttSent = 0;
+				MCU_GetTime_Server(WIFI_MQTT_EN);
+				//mt_wifi_Mqtt_SentDat();
 			}
 			break;
 	}

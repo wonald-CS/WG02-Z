@@ -4,10 +4,12 @@
 
 #define ESP12_AT_LEN 70
 
-#define WIFI_TX_QUEUE_SUM			    10		//发送网关命令队列组个数	
-#define WIFI_TX_BUFFSIZE_MAX			200     //2 + 198
+#define WIFI_TX_QUEUE_SUM			    10					//发送网关命令队列组个数	
+#define WIFI_TX_BUFFSIZE_MAX			200    				//2 + 198
 
 #define WIFI_RXBUFFSIZE_MAX		    	800
+
+#define Get_Ser_Time					1800000				//30Min
 
 
 typedef enum 
@@ -107,5 +109,6 @@ typedef struct
 void mt_wifi_init(void);
 void mt_wifi_pro(void);
 void mt_wifi_changState(en_Esp12_sta sta);
+void mt_wifi_Mqtt_SentDat(unsigned char *buf);
 
 #endif

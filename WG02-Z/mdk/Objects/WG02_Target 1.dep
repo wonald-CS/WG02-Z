@@ -429,7 +429,7 @@ I (..\mt\mt_task.h)(0x62D7B7BE)
 I (..\mt\mt_flash.h)(0x62CE4740)
 I (..\mt\mt_tftlcd.h)(0x62D79C64)
 I (..\mt\mt_lora.h)(0x62E6D87B)
-I (..\mt\mt_wifi.h)(0x65655D78)
+I (..\mt\mt_wifi.h)(0x6569829D)
 I (..\mt\mt_4g.h)(0x62EA0C6E)
 I (..\mt\mt_mqtt.h)(0x6566A6CC)
 F (..\mt\mt_lora.c)(0x62E6D873)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\mdk -I ..\App -I ..\Hal -I ..\Libraries\CMSIS\CM3\CoreSupport -I ..\Libraries\STM32F10x_StdPeriph_Driver\inc -I ..\mt -I ..\OS -I ..\User-I"E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include"-I"E:\keep going\Keil\ARM\CMSIS\Include"-D__UVISION_VERSION="533" -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER-o .\objects\mt_lora.o --omf_browse .\objects\mt_lora.crf --depend .\objects\mt_lora.d)
@@ -439,14 +439,15 @@ I (..\mt\mt_api.h)(0x65640D2F)
 I (..\OS\os_system.h)(0x62DF5DB8)
 F (..\mt\mt_api.c)(0x65640D19)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\mdk -I ..\App -I ..\Hal -I ..\Libraries\CMSIS\CM3\CoreSupport -I ..\Libraries\STM32F10x_StdPeriph_Driver\inc -I ..\mt -I ..\OS -I ..\User-I"E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include"-I"E:\keep going\Keil\ARM\CMSIS\Include"-D__UVISION_VERSION="533" -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER-o .\objects\mt_api.o --omf_browse .\objects\mt_api.crf --depend .\objects\mt_api.d)
 I (..\mt\mt_api.h)(0x65640D2F)
-F (..\mt\mt_wifi.c)(0x6566AED9)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\mdk -I ..\App -I ..\Hal -I ..\Libraries\CMSIS\CM3\CoreSupport -I ..\Libraries\STM32F10x_StdPeriph_Driver\inc -I ..\mt -I ..\OS -I ..\User-I"E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include"-I"E:\keep going\Keil\ARM\CMSIS\Include"-D__UVISION_VERSION="533" -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER-o .\objects\mt_wifi.o --omf_browse .\objects\mt_wifi.crf --depend .\objects\mt_wifi.d)
+F (..\mt\mt_wifi.c)(0x6569A33B)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\mdk -I ..\App -I ..\Hal -I ..\Libraries\CMSIS\CM3\CoreSupport -I ..\Libraries\STM32F10x_StdPeriph_Driver\inc -I ..\mt -I ..\OS -I ..\User-I"E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include"-I"E:\keep going\Keil\ARM\CMSIS\Include"-D__UVISION_VERSION="533" -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER-o .\objects\mt_wifi.o --omf_browse .\objects\mt_wifi.crf --depend .\objects\mt_wifi.d)
 I (..\OS\OS_System.h)(0x62DF5DB8)
 I (..\Hal\hal_uart.h)(0x62EA0668)
-I (..\mt\mt_wifi.h)(0x65655D78)
+I (..\mt\mt_wifi.h)(0x6569829D)
 I (..\Hal\hal_Gpio.h)(0x62EA07B1)
 I (E:\keep going\Keil\ARM\ARMCC\include\string.h)(0x5E8E2EB2)
 I (..\mt\mt_api.h)(0x65640D2F)
 I (..\mt\mt_mqtt.h)(0x6566A6CC)
+I (..\mt\mt_protocol.h)(0x6569A20F)
 F (..\mt\mt_4G.c)(0x62EA0DB7)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\mdk -I ..\App -I ..\Hal -I ..\Libraries\CMSIS\CM3\CoreSupport -I ..\Libraries\STM32F10x_StdPeriph_Driver\inc -I ..\mt -I ..\OS -I ..\User-I"E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include"-I"E:\keep going\Keil\ARM\CMSIS\Include"-D__UVISION_VERSION="533" -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER-o .\objects\mt_4g.o --omf_browse .\objects\mt_4g.crf --depend .\objects\mt_4g.d)
 I (..\mt\mt_4g.h)(0x62EA0C6E)
 I (..\mt\mt_api.h)(0x65640D2F)
@@ -459,6 +460,10 @@ I (..\mt\mt_mqtt.h)(0x6566A6CC)
 I (..\mt\mt_MD5.h)(0x65605611)
 I (..\App\para.h)(0x65605AB9)
 F (..\mt\mt_MD5.lib)(0x6563FCEE)()
+F (..\mt\mt_protocol.c)(0x6569A256)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\mdk -I ..\App -I ..\Hal -I ..\Libraries\CMSIS\CM3\CoreSupport -I ..\Libraries\STM32F10x_StdPeriph_Driver\inc -I ..\mt -I ..\OS -I ..\User-I"E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include"-I"E:\keep going\Keil\ARM\CMSIS\Include"-D__UVISION_VERSION="533" -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER-o .\objects\mt_protocol.o --omf_browse .\objects\mt_protocol.crf --depend .\objects\mt_protocol.d)
+I (..\mt\mt_protocol.h)(0x6569A20F)
+I (..\mt\mt_wifi.h)(0x6569829D)
+I (E:\keep going\Keil\ARM\ARMCC\include\string.h)(0x5E8E2EB2)
 F (..\App\app.c)(0x656154BF)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\mdk -I ..\App -I ..\Hal -I ..\Libraries\CMSIS\CM3\CoreSupport -I ..\Libraries\STM32F10x_StdPeriph_Driver\inc -I ..\mt -I ..\OS -I ..\User-I"E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include"-I"E:\keep going\Keil\ARM\CMSIS\Include"-D__UVISION_VERSION="533" -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER-o .\objects\app.o --omf_browse .\objects\app.crf --depend .\objects\app.d)
 I (..\App\app.h)(0x62D7B898)
 I (..\Hal\hal_al6630.h)(0x62DE5274)
@@ -468,7 +473,7 @@ I (..\Hal\hal_gpio.h)(0x62EA07B1)
 I (..\mt\mt_tftlcd.h)(0x62D79C64)
 I (..\mt\mt_lora.h)(0x62E6D87B)
 I (..\mt\lcdfont.h)(0x62D465C8)
-I (..\mt\mt_wifi.h)(0x65655D78)
+I (..\mt\mt_wifi.h)(0x6569829D)
 F (..\App\para.c)(0x65605AC6)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\mdk -I ..\App -I ..\Hal -I ..\Libraries\CMSIS\CM3\CoreSupport -I ..\Libraries\STM32F10x_StdPeriph_Driver\inc -I ..\mt -I ..\OS -I ..\User-I"E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include"-I"E:\keep going\Keil\ARM\CMSIS\Include"-D__UVISION_VERSION="533" -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER-o .\objects\para.o --omf_browse .\objects\para.crf --depend .\objects\para.d)
 I (..\App\para.h)(0x65605AB9)
 F (..\OS\OS_System.c)(0x62D7A226)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\mdk -I ..\App -I ..\Hal -I ..\Libraries\CMSIS\CM3\CoreSupport -I ..\Libraries\STM32F10x_StdPeriph_Driver\inc -I ..\mt -I ..\OS -I ..\User-I"E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include"-I"E:\keep going\Keil\ARM\CMSIS\Include"-D__UVISION_VERSION="533" -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER-o .\objects\os_system.o --omf_browse .\objects\os_system.crf --depend .\objects\os_system.d)

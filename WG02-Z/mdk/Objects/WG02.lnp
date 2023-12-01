@@ -24,6 +24,7 @@
 ".\objects\mt_4g.o"
 ".\objects\mt_mqtt.o"
 "..\mt\mt_MD5.lib"
+".\objects\mt_protocol.o"
 ".\objects\app.o"
 ".\objects\para.o"
 ".\objects\os_system.o"

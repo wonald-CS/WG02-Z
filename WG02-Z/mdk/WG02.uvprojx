@@ -518,6 +518,11 @@
               <FileType>4</FileType>
               <FilePath>..\mt\mt_MD5.lib</FilePath>
             </File>
+            <File>
+              <FileName>mt_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mt\mt_protocol.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
