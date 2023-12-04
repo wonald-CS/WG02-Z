@@ -8,3 +8,5 @@
 .\objects\app.o: ..\mt\mt_lora.h
 .\objects\app.o: ..\mt\lcdfont.h
 .\objects\app.o: ..\mt\mt_wifi.h
+.\objects\app.o: ..\App\para.h
+.\objects\app.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\string.h

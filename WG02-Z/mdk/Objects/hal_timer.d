@@ -31,3 +31,4 @@
 .\objects\hal_timer.o: ..\Hal\hal_timer.h
 .\objects\hal_timer.o: ..\Hal\hal_led.h
 .\objects\hal_timer.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\string.h
+.\objects\hal_timer.o: ..\App\para.h

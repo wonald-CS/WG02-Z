@@ -229,7 +229,7 @@ void WIFI_MQTT_Sub_RecPro(unsigned char *p,unsigned char *OutPut,unsigned char *
 		// if(i > 2)
 		// break;
 	}
-
+	pdata++;
 	*Lenth = len;
 
 
@@ -432,6 +432,9 @@ unsigned char WIFI_RxMsg_Analysis(unsigned char *pData,unsigned char *res,unsign
 unsigned char Mqtt_Step_Pro(void)
 {
 	static unsigned int Time_Delay_MqttSent = 0;
+	static unsigned char Powe_On = 1;
+	static unsigned int Timer_GetTime = Get_Ser_Time_Power;
+	
 	unsigned char i,j;
 	unsigned char Mqtt_Buff[WIFI_TX_BUFFSIZE_MAX];
 	
@@ -601,12 +604,17 @@ unsigned char Mqtt_Step_Pro(void)
 
 		case STEP_MQTT_PUB:
 			Time_Delay_MqttSent	++;
-			if(Time_Delay_MqttSent > 500)  //半小时同步一次
+			if(Time_Delay_MqttSent > Timer_GetTime)  //半小时同步一次
 			{
+				if (Powe_On == 1)
+				{
+					Powe_On = 0;
+					Timer_GetTime = Get_Ser_Time;
+				}
 				Time_Delay_MqttSent = 0;
 				MCU_GetTime_Server(WIFI_MQTT_EN);
-				//mt_wifi_Mqtt_SentDat();
 			}
+
 			break;
 	}
 	return 0xff;
@@ -623,6 +631,7 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 {
   	static unsigned char len;
 	static unsigned char hexDataBuff[WIFI_RXBUFFSIZE_MAX],DataBuff[WIFI_RXBUFFSIZE_MAX];
+
 	switch((unsigned char)res)
 	{
 		case ESP12_AT_RESPONSE_WIFI_CONNECTED:
@@ -726,8 +735,8 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 			WIFI_MQTT_Sub_RecPro(pData,DataBuff,&len);
 			if(!(len % 2))
 			{
-				asciiToHexConversion(DataBuff,hexDataBuff,len);				
-				//mt_protocol_WIFIMqttRecHandle(&hexDataBuff[0],len/2);
+				asciiToHexConversion(DataBuff,hexDataBuff,len);			
+				mt_protocol_WIFIMqttRecHandle(&hexDataBuff[0],len/2);				
 			}
 			mt_mqtt_SetNewFlag(MQTT_REC_MESSAGE_NEW);		
 		}

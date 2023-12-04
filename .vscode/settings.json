@@ -12,6 +12,8 @@
         "mt_4g.h": "c",
         "mt_md5.h": "c",
         "mt_mqtt.h": "c",
-        "mt_protocol.h": "c"
+        "mt_protocol.h": "c",
+        "para.h": "c",
+        "hal_led.h": "c"
     }
 }

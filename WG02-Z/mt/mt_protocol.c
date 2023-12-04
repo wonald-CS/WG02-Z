@@ -1,9 +1,11 @@
 #include "mt_protocol.h"
 #include "mt_wifi.h"
 #include "string.h"
+#include "para.h"
+#include "mt_api.h"
 
 Master_Server_Para Master_Server_Str;
-
+Server_Time_Para   Server_Time;
 
 
 
@@ -96,5 +98,61 @@ void MCU_GetTime_Server(unsigned char comType)
 
     mt_protocol_DataPack(WIFI_MQTT_EN);
 
+    
+}
+
+
+/*******************************************************************************************
+*@description:WIFI的mqtt的数据处理
+*@param[in]：*pdata: 接收的数据,len：数据长度
+*@return：无
+*@others：
+********************************************************************************************/
+void mt_protocol_WIFIMqttRecHandle(unsigned char* pdata,unsigned char len)
+{
+    Server_Time_Para *pstData = NULL;
+    unsigned short Year;
+    
+    pstData = (Server_Time_Para *)pdata;
+    Year = pstData->Time.year;
+	
+    if (pstData->Data_Head == 0xAA)
+    {
+        if (len<3)
+        {
+            return;
+        }
+
+        if (pstData->Data_Tail == 0x55)
+        {
+            switch (pstData->Data_Cmd)
+            {
+                case GLINK_S_CMD_GETDATE:
+                    Year = SWAP16(Year);
+                    MT_SET_DATE_YEAR(Year);
+                    MT_SET_DATE_MON(pstData->Time.month);
+                    MT_SET_DATE_DAY(pstData->Time.day);
+                    MT_SET_DATE_WEEK(pstData->Time.week);
+                    MT_SET_DATE_HOUR(pstData->Time.hour);
+                    MT_SET_DATE_MIN(pstData->Time.min);
+                    MT_SET_DATE_SEC(pstData->Time.second);
+                break;
+            
+                case GLINK_S_CMD_INFORM_UPDATE:
+
+                break;
+
+                case GLINK_R_CMD_UPDATE_DATA:
+
+                break;
+
+                case GLINK_R_CMD_GATEWAY:
+
+                break;
+            }
+        }
+        
+        
+    }
     
 }

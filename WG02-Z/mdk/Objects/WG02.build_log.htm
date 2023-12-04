@@ -27,11 +27,17 @@ Project File Date:  11/30/2023
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'E:\keep going\Keil\ARM\ARMCC\Bin'
 Build target 'Target 1'
+compiling mt_protocol.c...
+compiling mt_task.c...
+compiling app.c...
+..\App\app.c(88): warning:  #177-D: function "KeyEventHandle"  was declared but never referenced
+  static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
+..\App\app.c: 1 warning, 0 errors
 compiling mt_wifi.c...
 linking...
-Program Size: Code=22812 RO-data=31244 RW-data=264 ZI-data=9992  
+Program Size: Code=23592 RO-data=31244 RW-data=284 ZI-data=10004  
 FromELF: creating hex file...
-".\Objects\WG02.axf" - 0 Error(s), 0 Warning(s).
+".\Objects\WG02.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -44,7 +50,7 @@ Package Vendor: Keil
   E:\keep going\Keil\Keil\STM32F1xx_DFP\2.1.0\Device\Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

@@ -7,14 +7,18 @@
 #include "mt_lora.h"
 #include "lcdfont.h"
 #include "mt_wifi.h"
+#include "para.h"
+#include "string.h"
 
 
 static void temHum_icon_Display(unsigned char fuc);
 static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta);
 static void PowerState_icon_Display(void);
+static void	showSystemTime(void);
 
 static str_LoraAppNetState stgMenu_LoraDetectorApplyNetPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
 static unsigned char str_lora_loracommPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
+
 void app_task_init(void)
 {
 	//hal_KeyScanCBSRegister(KeyEventHandle); 
@@ -24,6 +28,7 @@ void app_task_init(void)
 
 void app_task(void)
 {
+	showSystemTime();
 	temHum_icon_Display(0);
 	PowerState_icon_Display();
 }
@@ -284,7 +289,68 @@ static void PowerState_icon_Display(void)
 }	
 
 
+static void showSystemTime(void)
+{   
+	unsigned char displaytimebuf[16];
+	memset(displaytimebuf,0,16);
 
+	displaytimebuf[0] = (stuSystemtime.year/1000) +'0';	
+	displaytimebuf[1] = (stuSystemtime.year%1000/100) +'0';	
+	displaytimebuf[2] = (stuSystemtime.year%1000%100/10) +'0';
+	displaytimebuf[3] = (stuSystemtime.year%1000%100%10) +'0';
+	displaytimebuf[4] = '-';	
+
+	displaytimebuf[5] = (stuSystemtime.mon/10) +'0';
+	displaytimebuf[6] = (stuSystemtime.mon%10) +'0';
+	displaytimebuf[7] = '-';	
+
+	displaytimebuf[8] = (stuSystemtime.day/10) +'0';
+	displaytimebuf[9] = (stuSystemtime.day%10) +'0';	
+	displaytimebuf[10] = 0;
+	LCD_ShowString(20,200,displaytimebuf,HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+	
+	displaytimebuf[0] = (stuSystemtime.hour/10)+'0';
+	displaytimebuf[1] = (stuSystemtime.hour%10)+'0';
+	displaytimebuf[2] = ':';	
+	displaytimebuf[3] = (stuSystemtime.min/10)+'0';
+	displaytimebuf[4] = (stuSystemtime.min%10)+'0';		
+	displaytimebuf[5] = 0;
+//	displaytimebuf[5] = ':';
+//	displaytimebuf[6] = (stuSystemtime.sec/10)+'0';
+//	displaytimebuf[7] = (stuSystemtime.sec%10)+'0';
+//	displaytimebuf[8] = 0;
+	LCD_ShowString(160,200,displaytimebuf,HUE_LCD_FONT,HUE_LCD_BACK,24,0);	
+	switch(stuSystemtime.week)
+	{
+		case 0:	
+			LCD_ShowString(260,200,"Sun",HUE_LCD_FONT,HUE_LCD_BACK,24,0);	
+		break;
+
+		case 1:	
+			LCD_ShowString(260,200,"Mon",HUE_LCD_FONT,HUE_LCD_BACK,24,0);	
+		break;
+
+		case 2:	
+			LCD_ShowString(260,200,"Tue",HUE_LCD_FONT,HUE_LCD_BACK,24,0);		
+		break;
+
+		case 3:	
+			LCD_ShowString(260,200,"Wed",HUE_LCD_FONT,HUE_LCD_BACK,24,0);					
+		break;
+		
+		case 4:	
+			LCD_ShowString(260,200,"Thu",HUE_LCD_FONT,HUE_LCD_BACK,24,0);			
+		break;
+
+		case 5:	
+			LCD_ShowString(260,200,"Fir",HUE_LCD_FONT,HUE_LCD_BACK,24,0);	
+		break;
+		
+		case 6:	
+			LCD_ShowString(260,200,"Sat",HUE_LCD_FONT,HUE_LCD_BACK,24,0);	
+		break;
+	}		
+}
 
 
 

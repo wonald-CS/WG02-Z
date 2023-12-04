@@ -2,6 +2,7 @@
 #include "hal_timer.h"
 #include "hal_led.h"
 #include "string.h"
+#include "para.h"
 
 volatile Stu_TimerTypedef Stu_Timer[T_SUM];
 
@@ -215,6 +216,7 @@ void TIM4_IRQHandler(void)
 {
 	Hal_TimerHandle();
 	TIM_ClearFlag(TIM4, TIM_FLAG_Update);
+	SystemTime_local();
 }
 
 /////////////////////////////////

@@ -37,8 +37,20 @@ struct Data_Custom
     unsigned short Data_UTC;            //时间区，默认东八区北京：00 08
 };
 
+struct Time_para
+{
+    unsigned short year;                //年
+    unsigned char month;                //月
+    unsigned char day;                  //日
+    unsigned char week;                 //周
+    unsigned char hour;                 //时
+    unsigned char min;                  //分
+    unsigned char second;               //秒
+};
 
-typedef struct{
+
+typedef struct
+{
     unsigned short Struct_Len;          //sizeof()
 	unsigned char Data_Head;            //帧头默认0xAA
 	unsigned short Data_Len;            //数据长度：命令+自定义数据的长度+校验值+帧尾。
@@ -48,8 +60,22 @@ typedef struct{
     unsigned char Data_Tail;            //帧尾默认0x55
 }Master_Server_Para;
 
+typedef struct
+{
+ 	unsigned char Data_Head;            //帧头默认0xAA
+	unsigned short Data_Len;            //数据长度：命令+自定义数据的长度+校验值+帧尾。
+    unsigned char Data_Cmd;             //命令
+    unsigned char Data_ID;              //数据帧ID
+    struct Time_para Time;              //时间
+    unsigned char Data_Check;           //校验值
+    unsigned char Data_Tail;            //帧尾默认0x55 
+}Server_Time_Para;
+
+
 #pragma pack()        //恢复结构体的默认对齐
 
 
 void MCU_GetTime_Server(unsigned char comType);
+void mt_protocol_WIFIMqttRecHandle(unsigned char* pdata,unsigned char len);
+
 #endif

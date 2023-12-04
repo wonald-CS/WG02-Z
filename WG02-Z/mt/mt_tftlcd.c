@@ -3,7 +3,7 @@
 #include "lcdfont.h"
 
 static void hal_tftlcd_Delay(unsigned int de);
-void showSystemTime(void);
+
 unsigned char ColorBuf[640];
 
 void mt_tftlcd_init(void)
@@ -111,7 +111,6 @@ void mt_tftlcd_init(void)
 		LCD_ShowPicture32PixFont(COOR_ICON_SIM_X,COOR_ICON_SIM_Y,ICON_32X32_GSM_NOCARD,HUE_LCD_FONT,HUE_LCD_BACK,0);
 		LCD_ShowPicture32PixFont(COOR_ICON_SERVER_X,COOR_ICON_SERVER_Y,ICON_32X32_SERVER,HUE_LCD_FONT,HUE_LCD_BACK,0);
 		LCD_ShowString(COOR_ICON_SYSTEMODE_X,COOR_ICON_SYSTEMODE_Y," DISARM ",HUE_LCD_FONT,HUE_LCD_BACK,48,0); 
-		showSystemTime();
 } 
 
 /******************************************************************************
@@ -300,33 +299,4 @@ void LCD_ShowPicture32PixFont(unsigned short x,unsigned short y,unsigned char nu
 			}
 		}
 	}   	 	  
-}
-
-void showSystemTime(void)
-{
-//2021-04-09 18:10 Sun
-	unsigned char displaytimebuf[16];
-
-	displaytimebuf[0]=0x32;
-	displaytimebuf[1]=0x30;	
-	displaytimebuf[2]='2';
-	displaytimebuf[3]='3';;
-	displaytimebuf[4]='-';	
-	displaytimebuf[5]='1';
-	displaytimebuf[6]='1';
-	displaytimebuf[7]='-';	
-	displaytimebuf[8]='0';
-	displaytimebuf[9]='2';	
-	displaytimebuf[10]=0;
-	LCD_ShowString(20,200,displaytimebuf,HUE_LCD_FONT,HUE_LCD_BACK,24,0);
-	
-	
-	displaytimebuf[0]='1';
-	displaytimebuf[1]='1';
-	displaytimebuf[2]=':';	
-	displaytimebuf[3]='3';
-	displaytimebuf[4]='0';		
-	displaytimebuf[5]=0;	
-	LCD_ShowString(160,200,displaytimebuf,HUE_LCD_FONT,HUE_LCD_BACK,24,0);	
-  LCD_ShowString(260,200,"Mon",HUE_LCD_FONT,HUE_LCD_BACK,24,0);	
 }
