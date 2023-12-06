@@ -9,7 +9,7 @@
 
 #define WIFI_RXBUFFSIZE_MAX		    	800
 
-#define Get_Ser_Time					    1800000				//30Min
+#define Get_Ser_Time					2500				//1Min
 #define Get_Ser_Time_Power				100
 
 

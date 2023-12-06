@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\WG02.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\WG02.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Mon Dec 04 15:05:22 2023
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Wed Dec 06 10:41:48 2023
 <BR><P>
 <H3>Maximum Stack Usage =        984 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -847,7 +847,7 @@ Global Symbols
 <P><STRONG><a name="[6]"></a>MemManage_Handler</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, stm32f10x_it.o(i.MemManage_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f10x_cl.o(RESET)
 </UL>
-<P><STRONG><a name="[8f]"></a>Mqtt_Step_Pro</STRONG> (Thumb, 910 bytes, Stack size 216 bytes, mt_wifi.o(i.Mqtt_Step_Pro))
+<P><STRONG><a name="[8f]"></a>Mqtt_Step_Pro</STRONG> (Thumb, 924 bytes, Stack size 216 bytes, mt_wifi.o(i.Mqtt_Step_Pro))
 <BR><BR>[Stack]<UL><LI>Max Depth = 952<LI>Call Chain = Mqtt_Step_Pro &rArr; MCU_GetTime_Server &rArr; mt_protocol_DataPack &rArr; mt_wifi_Mqtt_SentDat &rArr; mt_wifi_DataPack &rArr; WIFI_TxMsgInput &rArr; S_QueueDataIn
 </UL>
 <BR>[Calls]<UL><LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MCU_GetTime_Server
@@ -1859,6 +1859,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;S_QueueEmpty
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mqtt_Step_Pro
+<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_PowerManage
 <LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Wifi_Rx_Response_Handle
 </UL>
 
@@ -2236,14 +2237,15 @@ Local Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SeekSrting
 </UL>
 
-<P><STRONG><a name="[bb]"></a>Wifi_Rx_Response_Handle</STRONG> (Thumb, 264 bytes, Stack size 24 bytes, mt_wifi.o(i.Wifi_Rx_Response_Handle))
-<BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = Wifi_Rx_Response_Handle &rArr; WIFI_MQTT_Sub_RecPro
+<P><STRONG><a name="[bb]"></a>Wifi_Rx_Response_Handle</STRONG> (Thumb, 278 bytes, Stack size 24 bytes, mt_wifi.o(i.Wifi_Rx_Response_Handle))
+<BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = Wifi_Rx_Response_Handle &rArr; mt_wifi_PowerManage &rArr; hal_Gpio_AcStateCheck &rArr; hal_GPIO_GetACState
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_protocol_WIFIMqttRecHandle
 <LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_mqtt_SetNewFlag
 <LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_changState
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_Mqtt_Step
 <LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WIFI_MQTT_Sub_RecPro
+<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_PowerManage
 <LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_CwstateResposePro
 <LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;asciiToHexConversion
 <LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
@@ -2262,7 +2264,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_pro
 </UL>
 
-<P><STRONG><a name="[ff]"></a>hal_WifiTx_Pro</STRONG> (Thumb, 444 bytes, Stack size 16 bytes, mt_wifi.o(i.hal_WifiTx_Pro))
+<P><STRONG><a name="[ff]"></a>hal_WifiTx_Pro</STRONG> (Thumb, 490 bytes, Stack size 16 bytes, mt_wifi.o(i.hal_WifiTx_Pro))
 <BR><BR>[Stack]<UL><LI>Max Depth = 968<LI>Call Chain = hal_WifiTx_Pro &rArr; Mqtt_Step_Pro &rArr; MCU_GetTime_Server &rArr; mt_protocol_DataPack &rArr; mt_wifi_Mqtt_SentDat &rArr; mt_wifi_DataPack &rArr; WIFI_TxMsgInput &rArr; S_QueueDataIn
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;S_QueueEmpty
@@ -2283,17 +2285,19 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Wifi_Rx_Response_Handle
 </UL>
 
-<P><STRONG><a name="[93]"></a>mt_wifi_PowerManage</STRONG> (Thumb, 108 bytes, Stack size 8 bytes, mt_wifi.o(i.mt_wifi_PowerManage))
+<P><STRONG><a name="[93]"></a>mt_wifi_PowerManage</STRONG> (Thumb, 124 bytes, Stack size 8 bytes, mt_wifi.o(i.mt_wifi_PowerManage))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = mt_wifi_PowerManage &rArr; hal_Gpio_AcStateCheck &rArr; hal_GPIO_GetACState
 </UL>
 <BR>[Calls]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;hal_Gpio_AcStateCheck
 <LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;hal_GPIO_WIFIPowerEN_L
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;hal_GPIO_WIFIPowerEN_H
 <LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_changState
+<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_Mqtt_Step
 <LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mqtt_Step_Pro
 <LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;hal_WifiTx_Pro
+<LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Wifi_Rx_Response_Handle
 <LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mt_wifi_pro
 </UL>
 

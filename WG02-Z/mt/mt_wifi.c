@@ -256,6 +256,7 @@ static unsigned char mt_wifi_PowerManage(en_wifiPowerManageSta fuc)
 		{//Close WIFI Power
 			StartTime = 0;	
 			mt_wifi_changState(ESP12_STA_WIFI_POWER);
+			mt_wifi_Mqtt_Step(STEP_MQTT_FREE);
 		}
         if(StartTime == 0)
 		{
@@ -277,7 +278,9 @@ static unsigned char mt_wifi_PowerManage(en_wifiPowerManageSta fuc)
 	else
 	{// 电池供电  关闭WIFI 功能
 		StartTime = 0;
+		WIFI_NetSta.WIFI_Net_Sta = ESP12_LINK_FAIL;
 		mt_wifi_changState(ESP12_STA_WIFI_POWER);
+		mt_wifi_Mqtt_Step(STEP_MQTT_FREE);
 		hal_GPIO_WIFIPowerEN_H();
 		return 0;
 	}
@@ -449,6 +452,8 @@ unsigned char Mqtt_Step_Pro(void)
 				Time_Delay_MqttSent = 0;
 				mt_wifi_DataPack(ESP12_AT_MQTTCLEAN,&Mqtt_Buff[0]);
 				mt_wifi_Mqtt_Step(STEP_MQTT_CONF);	
+				Powe_On = 1;
+				Timer_GetTime = Get_Ser_Time_Power;
 				return 0;		
 			}
 			
@@ -604,7 +609,7 @@ unsigned char Mqtt_Step_Pro(void)
 
 		case STEP_MQTT_PUB:
 			Time_Delay_MqttSent	++;
-			if(Time_Delay_MqttSent > Timer_GetTime)  //半小时同步一次
+			if(Time_Delay_MqttSent > Timer_GetTime)  //1min同步一次
 			{
 				if (Powe_On == 1)
 				{
@@ -636,13 +641,15 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 	{
 		case ESP12_AT_RESPONSE_WIFI_CONNECTED:
 		{
-
 		}
 		break;
 
 		case ESP12_AT_RESPONSE_WIFI_DISCONNECT:
 		{
-
+			if(WIFI_Sta != ESP12_STA_WIFIConfig_Wait)
+			{
+				mt_wifi_PowerManage(STA_WIFI_POWER_RESET);		
+			}	
 		}
 		break;
 
@@ -915,10 +922,18 @@ static void hal_WifiTx_Pro(void)
 
 		case ESP12_STA_DETEC_READY:
 		{
+			Time_Delay_WifiSta ++;
+			i = 0xFF;
+			if(Time_Delay_WifiSta == 2000)
+			{
+				mt_wifi_DataPack(ESP12_AT_CWSTATE,&i);
+				Time_Delay_WifiSta = 0;
+			}
+
 			//WIFI配网成功后再配置MQTT
 			if (!Mqtt_Step_Pro())
 			{
-				
+				Time_Delay_WifiSta = 0;
 			}
 			
 		}
