@@ -6,7 +6,7 @@
 #include "string.h"
 
 
-const unsigned char GSM_AT[EC200_AT_MAX][70]=
+const unsigned char GSM_AT_Send[EC200_AT_MAX][70]=
 {
 	////初始化部分
 	"AT+CPIN?\0",
@@ -67,15 +67,266 @@ const unsigned char GSM_AT[EC200_AT_MAX][70]=
 };
 
 
+
+const unsigned char GSM_AT_Res[GSM_AT_RESPONSE_MAX][20]=
+{
+	"+CPIN: READY\0",	
+	"+CREG: 0,1\0",
+	"+CGREG: 0,1\0",
+	"+QMTOPEN: 0,2\0",
+	"+QMTOPEN: 0,0\0",   ///OPEN
+	
+	"+QMTCONN: 0,0,0\0",
+	"+QMTSUB: 0,1,0,0\0",
+	"+QMTPUBEX: 0,0,0\0",
+	"+QMTSTAT: 0,1\0",
+	"+QMTSTAT: 0,4\0",
+	">\0",
+	
+	"+QMTRECV: 0,0,\0",
+	
+	"+CMTI:\0",			//收到新的短信
+	"+CMGS:\0",
+	"+CLCC: 1,0,0,0,0,\0",//+CLCC: 1,0,0,0,0,		//呼叫成功返回
+	"+CLCC: 1,0,3,0,0,\0",											//电话拨通返回
+	"+CPAS: 0\0",
+    "NO CARRIER\0",
+	
+	"+QTONEDET:\0",//+QTONEDET
+	"RING\0",			//来电振铃
+	"NO CARRIER\0",		//通话连接时挂断
+	"BUSY\0",
+	"+QTTS:\0",	
+	"+CSQ:\0",
+	"+CMGR:\0",
+	"OK\0",
+	"AT+IPR=\0",
+	"86\0",
+    "POWERED DOWN\0",
+};
+
+
 volatile Queue16  GSM_TxIdxMsg;	
+volatile Queue1K  GSM_RxIdxMsg;
 
 unsigned char GSM_TxQueuePos;             	
 unsigned char GSM_TxBuff[GSM_TX_QUEUE_SUM][GSM_TX_BUFFSIZE_MAX];
+unsigned char GSM_RxBuff[GSM_TX_QUEUE_SUM];
 
 EC200C_variable  ES200C_Var;
 
 
+/*******************AT接收部分**************************/
 
+/*******************************************************************************************
+*@description:4G数据入列
+*@param[in]：
+*@return：无
+*@others：
+********************************************************************************************/
+static void mt_GSM_RxMsgInput(unsigned char dat)
+{	
+	QueueDataIn(GSM_RxIdxMsg,&dat,1);
+}
+
+/*******************************************************************************************
+*@description:解析通过串口接收4G的应答数据
+*@param[in]：*pData：GSM_RxBuff[0],  *res:接收的数据的枚举值,  *pIdx:字符串相同的起始下标,  num:接收数据长度
+*@return：0：匹配成功； 0xff：匹配失败；
+*@others：
+********************************************************************************************/
+unsigned char GSM_RxMsg_Analysis(unsigned char *pData,unsigned char *res,unsigned char *pIdx,unsigned short num)
+{
+	unsigned char i,j;
+	for (j = 0; j < GSM_AT_RESPONSE_MAX; j++)
+	{
+		i = SeekSrting(pData,(unsigned char*)GSM_AT_Res[j],num);
+		if (i != 0xff)
+		{
+			*res = j;
+			*pIdx = i;
+			return 0;
+		}
+		
+	}
+	return 0xff;
+}
+
+
+/*******************************************************************************************
+*@description:处理已解析完成的接收数据，执行相应动作
+*@param[in]：*pData：WIFI_RxBuff[0],  res:接收的数据的枚举值, strlon：接收数据长度
+*@return：
+*@others：
+********************************************************************************************/
+static void Wifi_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,unsigned short strlon)
+{
+  	static unsigned char len;
+	static unsigned char hexDataBuff[MT_GSM_RXBUFFSIZE_MAX],DataBuff[MT_GSM_RXBUFFSIZE_MAX];
+
+	switch((unsigned char)res)
+	{
+		case GSM_AT_RESPONSE_CPIN:
+		{
+		}
+		break;
+
+		case GSM_AT_RESPONSE_CREG:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_CGREG:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_MQTTOPEN:
+		{
+ 
+		}
+		break; 
+
+		case GSM_AT_RESPONSE_QMTCONN:
+		{
+			
+		}
+		break;
+
+		case GSM_AT_RESPONSE_MQTTSUB:
+		{
+			
+		}
+		break; 
+
+		case GSM_AT_RESPONSE_MQTTBEX:
+		{
+		
+		}
+		break;
+
+		case GSM_AT_RESPONSE_QMTSTAT:
+		{
+		
+		}
+		break;
+
+		case GSM_AT_RESPONSE_QMTSTAT_FAIL:
+		{ 
+		}
+		break;	
+
+		case GSM_AT_RESPONSE_WAITSENTDAT:
+		{
+		}
+		break;
+
+		case GSM_AT_RESPONSE_QMTRECV:
+		{
+		}
+		break;
+
+		case GSM_AT_RESPONSE_CMTI:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_CMGS:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_CLCC_0:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_CLCC_3:
+		{
+		}
+		break;
+
+		case GSM_AT_RESPONSE_CLCC_NO_CARRIER:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_TONE:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_RING:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_NOCARRIER:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_BUSY:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_QTTS:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_CSQ:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_CMGR:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_OK:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_IPR:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_IMEI_86:
+		{
+
+		}
+		break;
+
+		case GSM_AT_RESPONSE_POWEREDDOWN:
+		{
+
+		}
+		break;
+	}
+}
+
+
+/*******************AT发送部分**************************/
 
 /*******************************************************************************************
 *@description:缓存数组存入二维数组
@@ -116,9 +367,9 @@ void mt_GSM_DataPack(unsigned char cmd,unsigned char *pdata)
 	{//前1位为长度，后面为AT指令，最后2位为换行
 		for (i = 0; i < GSM_TX_BUFFSIZE_MAX; i++)
 		{
-			if (GSM_AT[cmd][i] != 0)
+			if (GSM_AT_Send[cmd][i] != 0)
 			{
-				DataPack_Array[1+i] = GSM_AT[cmd][i];
+				DataPack_Array[1+i] = GSM_AT_Send[cmd][i];
 			}else
 			{
 				while(*pdata != 0)
@@ -181,11 +432,13 @@ static void Mt_GSMTx_Pro(void)
 	{
 		Time_Delay_GSMSent ++;
 		if(Time_Delay_GSMSent > 15)
-		{//WIFI 指令发送间隔时间 100秒
+		{//WIFI 指令发送间隔时间 150ms
 			Time_Delay_GSMSent = 0;				
 			QueueDataOut(GSM_TxIdxMsg,&Idx);     //读出队列数字，发送对应位置数据
 			GSM_TxMsg_Send(&GSM_TxBuff[Idx][0]);
 		}
+	}else{
+		Time_Delay_GSMSent = 0;	
 	}
 }
 
@@ -198,7 +451,38 @@ static void Mt_GSMTx_Pro(void)
 ********************************************************************************************/
 static void Mt_GSMRx_Pro(void)
 {
+	GSM_ATres_TYPEDEF response;
+	static unsigned short Rx_Data_len = 0;	
+	unsigned char StrAddr,Ret;
+	while (QueueDataLen(GSM_RxIdxMsg) > 1)
+	{
+		//非MQTT指令
+		if(Rx_Data_len >= (MT_GSM_RXBUFFSIZE_MAX-5))
+		{//防止移除  
+				Rx_Data_len = 0;
+				return;
+		}	
 
+		QueueDataOut(GSM_RxIdxMsg,&GSM_RxBuff[Rx_Data_len++]);
+		if(GSM_RxBuff[Rx_Data_len - 1] == 0x0D)
+		{
+			GSM_RxBuff[Rx_Data_len++] = 0x0A;
+			
+			//如OK回车换行：0x79 0x75 0x0D 0x0A     rxbufferIDX = 4
+			//接收数据最低长度为4？ OK\n\r
+			if (Rx_Data_len > 2)
+			{	//response通过指针，从函数里面赋值
+				Ret = GSM_RxMsg_Analysis(&GSM_RxBuff[0],&response,&StrAddr,Rx_Data_len);
+				if (Ret == 0)
+				{
+					Wifi_Rx_Response_Handle(&GSM_RxBuff[0],response,Rx_Data_len);
+				}
+				
+			}
+			memset(&GSM_RxBuff[0], 0, sizeof(MT_GSM_RXBUFFSIZE_MAX));	
+			Rx_Data_len = 0;
+		}	
+	}
 }
 
 
@@ -251,7 +535,9 @@ void mt_4g_Init(void)
 {
     ES200C_Var.powerKeytime = 0;
 	GSM_TxQueuePos = 0;
+	hal_usart_Uart2DateRxCBSRegister(mt_GSM_RxMsgInput);
 	QueueEmpty(GSM_TxIdxMsg);
+	QueueEmpty(GSM_RxIdxMsg);
 	memset(&GSM_TxBuff[0], 0, sizeof(GSM_TX_BUFFSIZE_MAX));
     hal_GPIO_4GPowerKey_L(); 
 }
@@ -261,7 +547,7 @@ void mt_4g_pro(void)
 {
     EC200S_PutOnHandler();
 	Mt_GSMTx_Pro();
-	//Mt_GSMRx_Pro();
+	Mt_GSMRx_Pro();
 	ES200C_ApplicationTxd_ManagementFuction();
 }
 
