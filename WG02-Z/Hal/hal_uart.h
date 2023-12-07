@@ -1,6 +1,9 @@
 #ifndef _HAL_USART_H
 #define _HAL_USART_H
 
+//#define DEBUG_HAL_WIFI   1
+#define DEBUG_HAL_GSM    1
+
 typedef void (*Uart2DateRx)(unsigned char pdat);
 typedef void (*Uart3DateRx)(unsigned char pdat);
 typedef void (*Uart5DateRx)(unsigned char pdat); 

@@ -283,12 +283,22 @@ void USART1_PutInDebugString(unsigned char pData[],unsigned char len)
 ///////////////////////////////////
 void USART1_IRQHandler(void)
 {
+    // unsigned char dat;
+	// if(USART_GetITStatus(USART1,USART_IT_RXNE) != RESET)
+	// {							
+	// 	 dat = USART_ReceiveData(USART1);
+	// 	 USART_ClearITPendingBit(USART1,USART_IT_RXNE);
+	// 	 QueueDataIn(DebugTxMsg,&dat,1);		
+	// }
     unsigned char dat;
 	if(USART_GetITStatus(USART1,USART_IT_RXNE) != RESET)
 	{							
-		 dat = USART_ReceiveData(USART1);
-		 USART_ClearITPendingBit(USART1,USART_IT_RXNE);
-		 QueueDataIn(DebugTxMsg,&dat,1);		
+		dat = USART_ReceiveData(USART1);
+		USART_ClearITPendingBit(USART1,USART_IT_RXNE);
+		#ifdef DEBUG_HAL_GSM
+		USART_SendData(USART2,dat);
+		#endif 
+		// QueueDataIn(DebugTxMsg,&dat,1);		
 	}
 }
 
@@ -339,7 +349,10 @@ void USART2_IRQHandler(void)
 		{
 			Uart2DateRxCBS(dat);
 		}
-	   USART1_PutInDebugString(&dat,1);
+		#ifdef DEBUG_HAL_GSM
+		USART1_PutInDebugString(&dat,1);
+		#endif 
+	   
 	}
 }
 
@@ -365,7 +378,7 @@ void hal_usart_Uart3DateRxCBSRegister(Uart3DateRx pCBS)
 {
 	if(Uart3DateRxCBS == 0)
 	{
-			Uart3DateRxCBS = pCBS;
+		Uart3DateRxCBS = pCBS;
 	}
 }
 
@@ -382,7 +395,10 @@ void USART3_IRQHandler(void)
 		{
 			Uart3DateRxCBS(dat);
 		}
+		#ifdef DEBUG_HAL_WIFI
 		USART1_PutInDebugString(&dat,1);
+		#endif 
+		
 		
 	}
 }

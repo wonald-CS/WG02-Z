@@ -752,7 +752,7 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 }
 
 
-//接收测试函数
+//接收函数
 static void hal_WifiRx_Pro(void)
 {
 	en_esp12_atResponse response;
@@ -794,7 +794,7 @@ static void hal_WifiRx_Pro(void)
 
 
 
-//发送测试函数
+//发送函数
 static void hal_WifiTx_Pro(void)
 {
 	unsigned char Idx,i;
