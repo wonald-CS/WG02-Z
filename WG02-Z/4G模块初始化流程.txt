@@ -1,0 +1,25 @@
+//建议每一步都要等待应答，若重发5-10次无应答就重启4G模块
+
+1、GSM_STATE_WAIT_INIT：发送AT+CPIN? 判断GSM是否响应？   若10次内无应答，重启4G模块。若有，到下一个步骤。
+
+2、GSM_STATE_INIT：发送ATE1,AT+IPR=115022,AT+QIDEACT=1,AT+QIACT=1。判断最后一个OK！
+
+3、GSM_STATE_GET_CREG：延时3秒后发送AT+CREG? 判断应答，若无应答，重发5次无应答，重启4G模块。若有，到下一个步骤
+ 
+4、GSM_STATE_GET_CGREG：发送AT+CGREG?。同上
+
+5、GSM_STATE_SMSMQTT_INIT：同2测试一下
+			                 mt_sendATToGSM(EC200_AT_GSN,&i);	
+				 mt_sendATToGSM(EC200_AT_CIMI,&i);	
+				 mt_sendATToGSM(EC200_AT_SMSINIT_CSCA,&i);	
+				 mt_sendATToGSM(EC200_AT_SMSINIT_CMGF,&i);	
+				 mt_sendATToGSM(EC200_AT_SMSINIT_CSCS,&i);	
+				 mt_sendATToGSM(EC200_AT_SMSINIT_CCSMP,&i);	
+				 mt_sendATToGSM(EC200_AT_SMSINIT_CNMI,&i);
+				
+				 mt_sendATToGSM(EC200_AT_DIAL_CLVL,&i);
+			                 mt_sendATToGSM(EC200_AT_MQTT_VERSION,&i);
+				 mt_sendATToGSM(EC200_AT_MQTT_RECMODE,&i);
+				 mt_sendATToGSM(EC200_AT_MQTT_SETMODE,&i);
+
+6、GSM_STATE_READY：mt_sendATToGSM(EC200_AT_CSQ,&i)；等待应答

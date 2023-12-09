@@ -113,8 +113,8 @@ unsigned char GSM_TxQueuePos;
 unsigned char GSM_TxBuff[GSM_TX_QUEUE_SUM][GSM_TX_BUFFSIZE_MAX];
 unsigned char GSM_RxBuff[GSM_TX_QUEUE_SUM];
 
-EC200C_variable  ES200C_Var;
-
+EC200C_value  ES200C_Var;
+str_Gsm_SendSms	 GSM_SendSms;
 
 /*******************AT接收部分**************************/
 
@@ -168,18 +168,19 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,u
 	{
 		case GSM_AT_RESPONSE_CPIN:
 		{
+			GSM_SendSms.Step = GSM_STATE_INIT;
 		}
 		break;
 
 		case GSM_AT_RESPONSE_CREG:
 		{
-
+			GSM_SendSms.Step = GSM_STATE_GET_CGREG;			
 		}
 		break;
 
 		case GSM_AT_RESPONSE_CGREG:
 		{
-
+			GSM_SendSms.Step = GSM_STATE_SMSMQTT_INIT;
 		}
 		break;
 
@@ -301,7 +302,14 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,u
 
 		case GSM_AT_RESPONSE_OK:
 		{
-
+			switch (GSM_SendSms.Step)
+			{
+			case GSM_MQTT_INIT:
+				GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+				break;
+			
+			}
+			
 		}
 		break;
 
@@ -496,17 +504,117 @@ static void ES200C_ApplicationTxd_ManagementFuction(void)
 {
 	unsigned char i;
 	static unsigned short timeDelay = 0;
-	timeDelay++;					
-	if(timeDelay > 300)		//延时3秒	
+	timeDelay++;	
+
+	switch (GSM_SendSms.Step)
 	{
-		timeDelay= 0;
-	    i = 0;
-		mt_GSM_DataPack(EC200_AT_INIT_ATE0,&i);	
-		mt_GSM_DataPack(EC200_AT_INIT_IPR,&i);	
-		mt_GSM_DataPack(EC200_AT_QIDEACT,&i);	
-		mt_GSM_DataPack(EC200_AT_QIACT,&i);	
-		//mt_sendATToGSM(EC200_AT_ATE_CPIN,&i);				
+	case GSM_STATE_POWERON:
+		if(timeDelay > 200)		//延时2秒	
+		{
+			timeDelay = 0;
+			if (GSM_SendSms.MaxTimes)
+			{
+				GSM_SendSms.MaxTimes--;	
+				i = 0;
+				mt_GSM_DataPack(EC200_AT_ATE_CPIN,&i);	
+			}else{
+				ES200C_Var.powerKeytime = 0;
+				GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+			}
+		}
+		break;
+
+	case GSM_STATE_INIT:
+		if(timeDelay > 200)		//延时2秒	
+		{
+			timeDelay= 0;
+			i = 0;
+			mt_GSM_DataPack(EC200_AT_INIT_ATE0,&i);	
+			mt_GSM_DataPack(EC200_AT_INIT_IPR,&i);	
+			mt_GSM_DataPack(EC200_AT_QIDEACT,&i);	
+			mt_GSM_DataPack(EC200_AT_QIACT,&i);	
+			GSM_SendSms.Step = GSM_STATE_GET_CREG;
+		}	
+		break;
+
+	case GSM_STATE_GET_CREG:
+		if(timeDelay > 200)		//延时2秒	
+		{
+			timeDelay= 0;
+		    i = 0;
+			if (GSM_SendSms.MaxTimes)
+			{
+				GSM_SendSms.MaxTimes--;	
+				i = 0;
+				mt_GSM_DataPack(EC200_AT_INIT_CREG,&i);	
+			}else{
+				ES200C_Var.powerKeytime = 0;
+				GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+			}
+		}		
+		break;
+
+	case GSM_STATE_GET_CGREG:
+		if(timeDelay > 200)		//延时2秒	
+		{
+			timeDelay= 0;
+		    i = 0;
+			if (GSM_SendSms.MaxTimes)
+			{
+				GSM_SendSms.MaxTimes--;	
+				i = 0;
+				mt_GSM_DataPack(EC200_AT_INIT_CGREG,&i);	
+			}else{
+				ES200C_Var.powerKeytime = 0;
+				GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+			}	
+		}
+		break;
+
+	case GSM_STATE_SMSMQTT_INIT:
+		if(timeDelay > 300)		//延时3秒	
+		{
+			timeDelay= 0;
+		    i = 0;
+			mt_GSM_DataPack(EC200_AT_GSN,&i);	
+			mt_GSM_DataPack(EC200_AT_CIMI,&i);	
+			mt_GSM_DataPack(EC200_AT_SMSINIT_CSCA,&i);	
+			mt_GSM_DataPack(EC200_AT_SMSINIT_CMGF,&i);	
+			mt_GSM_DataPack(EC200_AT_SMSINIT_CSCS,&i);	
+			mt_GSM_DataPack(EC200_AT_SMSINIT_CCSMP,&i);	
+			mt_GSM_DataPack(EC200_AT_SMSINIT_CNMI,&i);
+		
+			mt_GSM_DataPack(EC200_AT_DIAL_CLVL,&i);
+			mt_GSM_DataPack(EC200_AT_MQTT_VERSION,&i);
+			mt_GSM_DataPack(EC200_AT_MQTT_RECMODE,&i);
+			mt_GSM_DataPack(EC200_AT_MQTT_SETMODE,&i);
+			GSM_SendSms.Step = GSM_MQTT_INIT;
+		}		
+		break;
+
+	case GSM_MQTT_INIT:
+		if(timeDelay > 200)		//延时2秒	
+		{
+			timeDelay= 0;
+		    i = 0;
+			if (GSM_SendSms.MaxTimes)
+			{
+				GSM_SendSms.MaxTimes--;	
+				i = 0;
+				mt_GSM_DataPack(EC200_AT_CSQ,&i);	
+			}else{
+				ES200C_Var.powerKeytime = 0;
+				GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+			}	
+		}	
+		break;
 	}
+
+
+
+
+
+
 }
 
 
@@ -531,6 +639,13 @@ static void EC200S_PutOnHandler(void)
 }
 
 
+void GSM_Para_Init(void)
+{
+	GSM_SendSms.Step = GSM_STATE_POWERON;
+	GSM_SendSms.PreDelayTime = 200;
+	GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+}
+
 void mt_4g_Init(void)
 {
     ES200C_Var.powerKeytime = 0;
@@ -539,6 +654,7 @@ void mt_4g_Init(void)
 	QueueEmpty(GSM_TxIdxMsg);
 	QueueEmpty(GSM_RxIdxMsg);
 	memset(&GSM_TxBuff[0], 0, sizeof(GSM_TX_BUFFSIZE_MAX));
+	GSM_Para_Init();
     hal_GPIO_4GPowerKey_L(); 
 }
 
