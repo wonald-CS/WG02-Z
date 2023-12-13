@@ -4,9 +4,10 @@
 #define GSM_TX_QUEUE_SUM			    13					//发送网关命令队列组个数	
 #define GSM_TX_BUFFSIZE_MAX				256    				//AT指令缓存字节最大数
 
-#define MT_GSM_RXBUFFSIZE_MAX			800
+#define MT_GSM_RXBUFFSIZE_MAX			500
 
 #define MT_GSM_ReSend_Time 				5
+#define Phone_Len						20
 
 typedef enum
 {
@@ -45,7 +46,7 @@ typedef enum
 	//报警拨打电话部分
 	EC200_AT_DIAL_ATD,     						//"ATD\0", 											//15 拨打电话 例如：ATD12345678902;
 	EC200_AT_DIAL_CLCC,     					//"AT+CLCC\0",										//16 查询当前呼叫
-	EC200_AT_DIAL_CPAS,     					//"AT+CLCC\0",										//16 查询当前呼叫
+	EC200_AT_DIAL_CPAS,     					//"AT+CPAS\0",										//16 查询当前呼叫
 	EC200_AT_DIAL_ATH,     						//"ATH\0",				    						//17 挂机
 	EC200_AT_DIAL_ATA,     						//"ATA\0",  		 								//18 来电收到RING ,接通电话。  
 
@@ -86,7 +87,7 @@ typedef enum
 	GSM_AT_RESPONSE_CLCC_0,				//电话接通
 	GSM_AT_RESPONSE_CLCC_3,				//电话拨通
 	GSM_AT_RESPONSE_CPAS0,
-	GSM_AT_RESPONSE_CLCC_NO_CARRIER,
+	GSM_AT_RESPONSE_CPAS6,
 	
 	
     GSM_AT_RESPONSE_TONE,
@@ -141,12 +142,12 @@ typedef enum
 	
 	//报警主机电话功能
 	//GSM_STATE_PHONECOMEIN_START,
-	GSM_STATE_DIAL_ATA,
-	GSM_STATE_DIAL_RING,//输入密码部分	
-	GSM_STATE_DIAL_CALLING,	
-	GSM_STATE_DIAL_ATH,
-	GSM_STATE_DIAL_NOCARRIER,
-	GSM_STATE_DIAL_END,
+	GSM_STATE_DIAL_ATD,					//拨号
+	GSM_STATE_DIAL_RING,				//振铃
+	GSM_STATE_DIAL_CALLING,				//通话
+	GSM_STATE_DIAL_ATH,					//挂断
+	GSM_STATE_DIAL_NOCARRIER,			//无应答
+	GSM_STATE_DIAL_END,					//结束
 	
 	
 	// GSM 发送短信部分
@@ -176,6 +177,13 @@ typedef enum
 }GSM_STATE_TYPE;
 
 
+typedef enum
+{
+	DIALTYPE_ALARM, ///报警打电话
+	DIALTYPE_CALL,  ///拨号打电话
+}GSM_Dial_Type;
+
+
 typedef struct 
 {
 	unsigned int powerKeytime;
@@ -185,12 +193,24 @@ typedef struct
 typedef struct 
 {
 	unsigned char Step;				  	 				 //当前步骤
-	unsigned short PreDelayTime;          				 //发送前的延时时间
 	unsigned char MaxTimes;               				 //发送的最大的次数	
 }str_Gsm_SendSms;
 
+
+typedef struct
+{
+	unsigned char Step;				  	 				 //当前步骤
+	unsigned char MaxTimes;               				 //发送的最大的次数	
+	unsigned char PhoneNo[Phone_Len];					 //电话号码 
+}str_Gsm_Phone_SendSms;
+
+
+
+
 void mt_4g_Init(void);
 void mt_4g_pro(void);
+void mt_4g_Phone_Handup(void);
+void mt_4G_PhoneDial_Ctrl(GSM_Dial_Type Type ,unsigned char *pdata);
 
 #endif
 

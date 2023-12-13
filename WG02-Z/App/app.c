@@ -8,6 +8,7 @@
 #include "lcdfont.h"
 #include "mt_wifi.h"
 #include "para.h"
+#include "mt_4G.h"
 #include "string.h"
 
 
@@ -21,7 +22,7 @@ static unsigned char str_lora_loracommPro(en_lora_eventTypedef event,str_cmdAppl
 
 void app_task_init(void)
 {
-	//hal_KeyScanCBSRegister(KeyEventHandle); 
+	hal_KeyScanCBSRegister(KeyEventHandle); 
 	mt_loraRxApplyNet_callback_Register(stgMenu_LoraDetectorApplyNetPro);
 	mt_lora_loracomm_callback_Register(str_lora_loracommPro);
 }
@@ -86,114 +87,105 @@ static void temHum_icon_Display(unsigned char fuc)
 }
 
 static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
-{//00-15
-	unsigned char keysta[3];
-	keysta[0] = keys/10 + 0x30;
-	keysta[1] = keys%10 + 0x30;
-	keysta[2] = 0;
-	
-    LCD_ShowString(0,40,"KEYDBC:",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
-	LCD_ShowString(80,40,keysta,HUE_LCD_FONT,HUE_LCD_BACK,24,0);
-	
-	LCD_ShowString(120,40,"-KEY-:",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
-	
+{	
+	unsigned char test[Phone_Len];
+
 	  switch((unsigned char)keys)
 	  {
 			case KEY0:
 			{
-				//mt_wifi_changState(ESP12_STA_WIFIConfig);
-				LCD_ShowString(200,40,"KEY0",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+
 			}
 			break;
 			case KEY1:
 			{
-				LCD_ShowString(200,40,"KEY1",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+
 			}
 			break;			
 			case KEY2_UP:
 			{
-				LCD_ShowString(200,40,"KEY2",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+
 			}
 			break;	
 			case KEY3:
 			{
-				LCD_ShowString(200,40,"KEY3",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+
 			}
 			break;	
 			case KEY4_LEFT:
 			{
-				LCD_ShowString(200,40,"KEY4",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+
 			}
 			break;			
 			case KEY5:
 			{
-				LCD_ShowString(200,40,"KEY5",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+
 			}
 			break;
 			case KEY6_RIGHT:
 			{
-				LCD_ShowString(200,40,"KEY6",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+				test[0] = 1;
+				test[1] = 0;
+				test[2] = 0;
+				test[3] = 8;
+				test[4] = 6;
+				test[5] = 0xff;
+        		mt_4G_PhoneDial_Ctrl(DIALTYPE_CALL,test);	
 			}
 			break;
 			case KEY7:
 			{
-				LCD_ShowString(200,40,"KEY7",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+				mt_4g_Phone_Handup();
 			}
 			break;									
 			case KEY8_DOWN:
 			{
-				LCD_ShowString(200,40,"KEY8",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+	
 			}
 			break;
 			case KEY9:
 			{
-				LCD_ShowString(200,40,"KEY9",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+			
 			}
 			break;			
 			case KEY_DISARM:
 			{
-				LCD_ShowString(200,40,"DISA",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+				
 			}
 			break;
 			
 			case KEY_HOMEARM:
 			{
-			  LCD_ShowString(200,40,"HOME",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+			 
 			}
 			break;
 			
 			case KEY_AWARARM:
 			{
-				LCD_ShowString(200,40,"AWAY",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+			
 			}
 			break;
 			
 			case KEY_RETURN_DAIL:
 			{
-				LCD_ShowString(200,40,"DAIL",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+				
 			}
 			break;
 
 			case KEY_SOS_DEL:
 			{
-				LCD_ShowString(200,40,"SOS ",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+				
 			}
 			break;
 			case KEY_MENU:
 			{
-				LCD_ShowString(200,40,"MENU",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
+			
 			}
 			break;
 		}
 
-	  keysta[0] = sta/10 + 0x30;
-	  keysta[1] = sta%10 + 0x30;
-		keysta[2] = 0;
-		
-		LCD_ShowString(0,65,"KEYSTA:",HUE_LCD_FONT,HUE_LCD_BACK,24,0);
-		LCD_ShowString(80,65,keysta,HUE_LCD_FONT,HUE_LCD_BACK,24,0);
 }
-/////////////////
+
 
 static unsigned char str_lora_loracommPro(en_lora_eventTypedef event,str_cmdApplyNet pData)
 {
