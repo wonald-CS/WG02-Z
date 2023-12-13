@@ -92,6 +92,7 @@ const unsigned char GSM_AT_Res[GSM_AT_RESPONSE_MAX][20]=
 	"+CPAS: 0\0",													
 	"+CPAS: 6\0",													//CPAS:6为呼叫并接听成功。
 	
+	"+QIURC: \0",													
 	"+QTONEDET:\0",//+QTONEDET
 	"RING\0",			//来电振铃
 	"NO CARRIER\0",		//通话连接时挂断
@@ -109,9 +110,12 @@ const unsigned char GSM_AT_Res[GSM_AT_RESPONSE_MAX][20]=
 volatile Queue16  GSM_TxIdxMsg;	
 volatile Queue1K  GSM_RxIdxMsg;
 
-unsigned char GSM_TxQueuePos;             	
-unsigned char GSM_TxBuff[GSM_TX_QUEUE_SUM][GSM_TX_BUFFSIZE_MAX];
-unsigned char GSM_RxBuff[MT_GSM_RXBUFFSIZE_MAX];
+unsigned char GSM_TxQueuePos;     										//发送数据位于队列的位置        	
+unsigned char GSM_TxBuff[GSM_TX_QUEUE_SUM][GSM_TX_BUFFSIZE_MAX];		//发送数组
+unsigned char GSM_RxBuff[MT_GSM_RXBUFFSIZE_MAX];						//接收数组
+
+unsigned char GSM_SIGNAL;												//SIM卡信号
+
 
 static void mt_GSM_DataPack(unsigned char cmd,unsigned char *pdata);
 
@@ -122,6 +126,60 @@ EC200C_value  ES200C_Var;
 //是因为全局变量GSM_RXBUFF里面的接收值越界导致结构体变量被改变，因为GSM_RxBuff[MT_GSM_RXBUFFSIZE_MAX]不小心改为GSM_TX_QUEUE_SUM导致数组越界
 str_Gsm_SendSms	 GSM_SendSms;
 str_Gsm_Phone_SendSms	 GSM_PhoneCall_SendSms;
+
+
+
+
+
+/******************************************************************************SIM卡信号部分**************************************************************/
+
+/*******************************************************************************************
+*@description:SIM卡信号获取函数
+*@param[in]：Type:正常或报警拨号； 
+*@return：无
+*@others：
+********************************************************************************************/
+static unsigned char mt_GSM_GetSignal(unsigned char *p)
+{
+	unsigned char *pdata;
+	unsigned char Value = 0;
+
+	pdata = p;
+	//+CSQ: 23,99
+	while(*pdata != ':') 
+	{
+		pdata++;	
+	}
+	pdata++;
+
+	while(*pdata != ',')
+	{
+		pdata++;
+		if((*pdata >= 0x30) && (*pdata <= 0x39))
+		{
+			Value *= 10; 
+			Value += *pdata - 0x30;  
+		}	
+	}
+
+		if(Value < 10)
+		{//信号很差
+			return 0;
+		}
+		else if(Value < 15)
+		{//有信号
+			return 1;
+		}
+		else if(Value < 20)
+		{//信号好
+			return 2;
+		}
+		else if(Value < 33)
+		{//信号很好
+			return 3;
+		}									
+
+}
 
 
 /******************************************************************************打电话部分**************************************************************/
@@ -423,6 +481,14 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,u
 		}
 		break;
 
+
+		case GSM_AT_RESPONSE_SIMOFF:
+		{
+			GSM_SendSms.Step = GSM_STATE_POWERON;
+			GSM_SIGNAL = 0xff;
+		}
+		break;
+
 		case GSM_AT_RESPONSE_TONE:
 		{
 
@@ -462,7 +528,7 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,u
 
 		case GSM_AT_RESPONSE_CSQ:
 		{
-
+			GSM_SIGNAL = mt_GSM_GetSignal(pData);
 		}
 		break;
 
@@ -672,7 +738,7 @@ static void Mt_GSMRx_Pro(void)
 *@return：无
 *@others：
 ********************************************************************************************/
-static void ES200C_ApplicationTxd_ManagementFuction(void)
+static void mt_4g_TxSend_AT(void)
 {
 	unsigned char i;
 	static unsigned short timeDelay = 0;
@@ -691,6 +757,7 @@ static void ES200C_ApplicationTxd_ManagementFuction(void)
 					i = 0;
 					mt_GSM_DataPack(EC200_AT_ATE_CPIN,&i);	
 				}else{
+					GSM_SIGNAL = 0xff;
 					ES200C_Var.powerKeytime = 0;
 					GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
 				}
@@ -727,6 +794,7 @@ static void ES200C_ApplicationTxd_ManagementFuction(void)
 					i = 0;
 					mt_GSM_DataPack(EC200_AT_INIT_CREG,&i);	
 				}else{
+					GSM_SIGNAL = 0xff;
 					ES200C_Var.powerKeytime = 0;
 					GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
 					GSM_SendSms.Step = GSM_STATE_INIT;
@@ -748,6 +816,7 @@ static void ES200C_ApplicationTxd_ManagementFuction(void)
 					i = 0;
 					mt_GSM_DataPack(EC200_AT_INIT_CGREG,&i);	
 				}else{
+					GSM_SIGNAL = 0xff;
 					ES200C_Var.powerKeytime = 0;
 					GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
 					GSM_SendSms.Step = GSM_STATE_INIT;
@@ -759,7 +828,7 @@ static void ES200C_ApplicationTxd_ManagementFuction(void)
 		case GSM_STATE_SMSMQTT_INIT:
 		{
 			timeDelay++;
-			if(timeDelay > 300)		//延时3秒	
+			if(timeDelay > 200)		//延时3秒	
 			{
 				timeDelay= 0;
 				i = 0;
@@ -783,7 +852,7 @@ static void ES200C_ApplicationTxd_ManagementFuction(void)
 		case GSM_MQTT_INIT:
 		{
 			timeDelay++;
-			if(timeDelay > 3000)		//延时30S	
+			if(timeDelay > 1500)		//延时15S	
 			{
 				timeDelay= 0;
 				i = 0;
@@ -793,6 +862,7 @@ static void ES200C_ApplicationTxd_ManagementFuction(void)
 					i = 0;
 					mt_GSM_DataPack(EC200_AT_CSQ,&i);	
 				}else{
+					GSM_SIGNAL = 0xff;
 					ES200C_Var.powerKeytime = 0;
 					GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
 					GSM_SendSms.Step = GSM_STATE_INIT;
@@ -851,6 +921,7 @@ void GSM_PhonePara_Init(void)
 
 void mt_4g_Init(void)
 {
+	GSM_SIGNAL = 0xff;
     ES200C_Var.powerKeytime = 0;
 	GSM_TxQueuePos = 0;
 	hal_usart_Uart2DateRxCBSRegister(mt_GSM_RxMsgInput);
@@ -860,7 +931,6 @@ void mt_4g_Init(void)
 	
 	GSM_PhonePara_Init();
 	GSM_Para_Init();
-	
     hal_GPIO_4GPowerKey_L(); 
 
 	
@@ -870,7 +940,7 @@ void mt_4g_Init(void)
 void mt_4g_pro(void)
 {
     EC200S_PutOnHandler();
-	ES200C_ApplicationTxd_ManagementFuction();
+	mt_4g_TxSend_AT();
 	Mt_GSMTx_Pro();
 	Mt_GSMRx_Pro();
 	

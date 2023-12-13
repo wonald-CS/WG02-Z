@@ -34,7 +34,7 @@ typedef enum
 	EC200_AT_MQTT_RECMODE,      				//"AT+QMTCFG=\"recv/mode\",0,0,1",
 	EC200_AT_MQTT_SETMODE,       				//"AT+QMTCFG=\"send/mode\",0,0",	
 	
-	EC200_AT_CSQ,         						//"AT+CSQ\0",					
+	EC200_AT_CSQ,         						//"AT+CSQ\0",									//获取SIM卡信号（若初始化后拔出SIM卡，CSQ一样会有正常的返回值）			
 
 	////MQTT通讯部分
 	EC200_AT_MQTT_OPEN,       					//"AT+QMTOPEN=0,\"119.91.158.8\",1883",
@@ -89,7 +89,7 @@ typedef enum
 	GSM_AT_RESPONSE_CPAS0,
 	GSM_AT_RESPONSE_CPAS6,
 	
-	
+	GSM_AT_RESPONSE_SIMOFF,				//SIM卡断开
     GSM_AT_RESPONSE_TONE,
 	GSM_AT_RESPONSE_RING,
 	
@@ -211,6 +211,6 @@ void mt_4g_Init(void);
 void mt_4g_pro(void);
 void mt_4g_Phone_Handup(void);
 void mt_4G_PhoneDial_Ctrl(GSM_Dial_Type Type ,unsigned char *pdata);
-
+extern unsigned char GSM_SIGNAL;
 #endif
 

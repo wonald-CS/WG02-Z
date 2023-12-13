@@ -16,6 +16,7 @@ static void temHum_icon_Display(unsigned char fuc);
 static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta);
 static void PowerState_icon_Display(void);
 static void	showSystemTime(void);
+static void Gsm_icon_Display(void);
 
 static str_LoraAppNetState stgMenu_LoraDetectorApplyNetPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
 static unsigned char str_lora_loracommPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
@@ -32,6 +33,7 @@ void app_task(void)
 	showSystemTime();
 	temHum_icon_Display(0);
 	PowerState_icon_Display();
+	Gsm_icon_Display();
 }
 
 
@@ -99,12 +101,18 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 			break;
 			case KEY1:
 			{
-
+				test[0] = 1;
+				test[1] = 0;
+				test[2] = 0;
+				test[3] = 8;
+				test[4] = 6;
+				test[5] = 0xff;
+        		mt_4G_PhoneDial_Ctrl(DIALTYPE_CALL,test);	
 			}
 			break;			
 			case KEY2_UP:
 			{
-
+				mt_4g_Phone_Handup();
 			}
 			break;	
 			case KEY3:
@@ -124,18 +132,10 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 			break;
 			case KEY6_RIGHT:
 			{
-				test[0] = 1;
-				test[1] = 0;
-				test[2] = 0;
-				test[3] = 8;
-				test[4] = 6;
-				test[5] = 0xff;
-        		mt_4G_PhoneDial_Ctrl(DIALTYPE_CALL,test);	
 			}
 			break;
 			case KEY7:
 			{
-				mt_4g_Phone_Handup();
 			}
 			break;									
 			case KEY8_DOWN:
@@ -344,6 +344,26 @@ static void showSystemTime(void)
 	}		
 }
 
+
+
+static void Gsm_icon_Display(void)
+{
+	static unsigned short Timer;
+	if(GSM_SIGNAL == 0xff)
+	{//没有SIM卡
+		LCD_ShowPicture32PixFont(282,0,ICON_32X32_GSM_NOCARD,HUE_LCD_FONT,HUE_LCD_BACK,0);
+	}
+	else
+		{//有SIM卡 需要显示信号的强弱
+		Timer ++;
+		if(Timer == 100)  //1秒
+		{
+			LCD_ShowPicture32PixFont(282,0,(GSM_SIGNAL+ICON_32X32_GSM_S1),HUE_LCD_FONT,HUE_LCD_BACK,0);
+			Timer = 0;
+		}		
+	}
+	/************************************/
+}
 
 
 
