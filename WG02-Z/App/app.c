@@ -91,6 +91,7 @@ static void temHum_icon_Display(unsigned char fuc)
 static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 {	
 	unsigned char test[Phone_Len];
+	unsigned char Mes[256];	
 
 	  switch((unsigned char)keys)
 	  {
@@ -107,7 +108,8 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 				test[3] = 8;
 				test[4] = 6;
 				test[5] = 0xff;
-        		mt_4G_PhoneDial_Ctrl(DIALTYPE_CALL,test);	
+
+        		mt_4G_PhoneDial_Ctrl(test);	
 			}
 			break;			
 			case KEY2_UP:
@@ -122,7 +124,45 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 			break;	
 			case KEY4_LEFT:
 			{
+//				test[0] = 1;
+//				test[1] = 8;
+//				test[2] = 3;
+//				test[3] = 2;
+//				test[4] = 0;
+//				test[5] = 6;
+//				test[6] = 6;
+//				test[7] = 9;
+//				test[8] = 2;
+//				test[9] = 2;
+//				test[10] = 7;
+//				test[11] = 0xff;
+				
+				test[0] = 1;
+				test[1] = 8;
+				test[2] = 3;
+				test[3] = 2;
+				test[4] = 0;
+				test[5] = 6;
+				test[6] = 6;
+				test[7] = 9;
+				test[8] = 2;
+				test[9] = 2;
+				test[10] = 7;
+				test[11] = 0xff;
 
+				Mes[0] = 'p';
+				Mes[1] = 'r';
+				Mes[2] = 't';
+				Mes[3] = 't';
+				Mes[4] = 'e';
+				Mes[5] = 'y';
+				Mes[6] = ' ';
+				Mes[7] = 'w';
+				Mes[8] = 'i';
+				Mes[9] = 'f';
+				Mes[10] = 'e';
+				Mes[11] = 0;
+				mt_4G_MesSend_Ctrl(test,Mes);
 			}
 			break;			
 			case KEY5:

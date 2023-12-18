@@ -9,6 +9,8 @@
 #define MT_GSM_ReSend_Time 				5
 #define Phone_Len						20
 
+#define MQTT_SENTDATA_SIZE_MAX   		140
+
 typedef enum
 {
 	EC200_AT_ATE_CPIN=0,  						//
@@ -26,7 +28,8 @@ typedef enum
 	EC200_AT_SMSINIT_CMGF,						//"AT+CMGF=1\0",								//配置短信设置的方式	
 	EC200_AT_SMSINIT_CSCS,						//"AT+CSCS=\"UCS2\"\0",							//配置短信设置的方式	
 	EC200_AT_SMSINIT_CCSMP,						//"AT+CSCS=AT+CSMP=49,167,0,25\0",				//配置短信设置的方式	
-	EC200_AT_SMSINIT_CNMI,						//"AT+CNMI=2,1,0,1,0\0",		
+	EC200_AT_SMSINIT_CNMI,						//"AT+CNMI=2,1,0,1,0\0",	
+	EC200_AT_SMS_CMGS,							//"AT+CMGS=\0"	
 
   	EC200_AT_DIAL_CLVL,     					//"AT+CLVL=5\0",								//33 扬声器等级最低
 	EC200_AT_DIAL_CLVL_CLOSE,     				//"AT+CLVL=0\0",
@@ -42,7 +45,6 @@ typedef enum
 	EC200_AT_MQTT_SUB,       					//"AT+QMTSUB=0,1,\"NewFirmware_down\",0",
 	EC200_AT_MQTT_PUB,       					//"AT+QMTPUBEX=0,0,0,0,\"rytwj01wwncy26A_up\",6",
 
-  	EC200_AT_SMS_CMGS,
 	//报警拨打电话部分
 	EC200_AT_DIAL_ATD,     						//"ATD\0", 											//15 拨打电话 例如：ATD12345678902;
 	EC200_AT_DIAL_CLCC,     					//"AT+CLCC\0",										//16 查询当前呼叫
@@ -59,9 +61,9 @@ typedef enum
   	EC200_AT_MAX,
 	
   	EC200_AT_MQTT_SENTDATA,	
-  	GSM_AT_SMSENTCONTENT,	
- 	GSM_AT_SMSENTCONTENT_END,
- 	GSM_AT_SMSENTCONTENT_FAIL,///1B
+  	GSM_AT_SMS_SENTDATA,	
+ 	GSM_AT_SMSENTCONTENT_END,					//1A
+ 	GSM_AT_SMSENTCONTENT_FAIL,					//1B
 }GSM_ATsend_TYPEDEF;
 
 
@@ -72,18 +74,18 @@ typedef enum
 	GSM_AT_RESPONSE_CGREG,				//"+CGREG: 0,1\0",
 	GSM_AT_RESPONSE_MQTTOPEN,
 	
-	GSM_AT_RESPONSE_QMTCONN = 0x05,		//"+QMTSTAT: 0,1\0",		
+	GSM_AT_RESPONSE_QMTCONN,		//"+QMTSTAT: 0,1\0",		
 	GSM_AT_RESPONSE_MQTTSUB,			//"+QMTSUB: 0,1,0,0\0",
 	GSM_AT_RESPONSE_MQTTBEX,			//"+QMTPUBEX: 0,0,0\0",
 	GSM_AT_RESPONSE_QMTSTAT,
-	GSM_AT_RESPONSE_QMTSTAT_FAIL,
-	GSM_AT_RESPONSE_WAITSENTDAT,  		//">\0",
-	
+	GSM_AT_RESPONSE_QMTSTAT_FAIL,	
 	GSM_AT_RESPONSE_QMTRECV,			//"+QMTRECV: 0,0,\0",
 	 
 	
 	GSM_AT_RESPONSE_CMTI,
 	GSM_AT_RESPONSE_CMGS,
+	GSM_AT_RESPONSE_CMGS_FIRST,
+	GSM_AT_RESPONSE_WAITSENTDAT,  		//">\0",
 	GSM_AT_RESPONSE_CLCC_0,				//电话接通
 	GSM_AT_RESPONSE_CLCC_3,				//电话拨通
 	GSM_AT_RESPONSE_CPAS0,
@@ -99,8 +101,7 @@ typedef enum
 	GSM_AT_RESPONSE_CSQ,
 	GSM_AT_RESPONSE_CMGR,
 	GSM_AT_RESPONSE_OK, 
-	GSM_AT_RESPONSE_IPR,	
-	GSM_AT_RESPONSE_IMEI_86,	
+	GSM_AT_RESPONSE_IPR,		
 	GSM_AT_RESPONSE_POWEREDDOWN,
 
 	GSM_AT_RESPONSE_MAX,
@@ -151,10 +152,9 @@ typedef enum
 	
 	
 	// GSM 发送短信部分
-	GSM_STATE_SMS_SENT_START,
-	GSM_STATE_SMS_SENT_WAITWRITE,
-	GSM_STATE_SMS_SENT_WRITE,
-	GSM_STATE_SMS_SENT_DELAY,
+	GSM_STATE_SMS_SENT_READY,
+	GSM_STATE_SMS_SENT_START,			//发送电话号码
+	GSM_STATE_SMS_SENT_WRITE,			//发送短信内容
 	GSM_STATE_SMS_SENT_FAIL,
 	GSM_STATE_SMS_SENT_END,		
 	//报警拨打电话部分
@@ -176,12 +176,6 @@ typedef enum
 	GSM_STATE_TELPHONE_END,	
 }GSM_STATE_TYPE;
 
-
-typedef enum
-{
-	DIALTYPE_ALARM, ///报警打电话
-	DIALTYPE_CALL,  ///拨号打电话
-}GSM_Dial_Type;
 
 
 typedef struct 
@@ -205,12 +199,22 @@ typedef struct
 }str_Gsm_Phone_SendSms;
 
 
+typedef struct
+{
+	unsigned char Step;				  	 				 //当前步骤
+	unsigned char MaxTimes;               				 //发送的最大的次数	
+	unsigned char PhoneNo[Phone_Len];					 //电话号码
+	unsigned char Send_MesBuff[MQTT_SENTDATA_SIZE_MAX];  //消息内容
+}str_Gsm_Mes_SendSms;
+
 
 
 void mt_4g_Init(void);
 void mt_4g_pro(void);
 void mt_4g_Phone_Handup(void);
-void mt_4G_PhoneDial_Ctrl(GSM_Dial_Type Type ,unsigned char *pdata);
+void mt_4G_PhoneDial_Ctrl(unsigned char *pdata);
+void mt_4G_MesSend_Ctrl(unsigned char *pdata,unsigned char *Data);
+
 extern unsigned char GSM_SIGNAL;
 #endif
 
