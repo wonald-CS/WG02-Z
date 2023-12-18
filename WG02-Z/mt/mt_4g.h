@@ -203,8 +203,6 @@ typedef struct
 {
 	unsigned char Step;				  	 				 //当前步骤
 	unsigned char MaxTimes;               				 //发送的最大的次数	
-	unsigned char PhoneNo[Phone_Len];					 //电话号码
-	unsigned char Send_MesBuff[MQTT_SENTDATA_SIZE_MAX];  //消息内容
 }str_Gsm_Mes_SendSms;
 
 
@@ -213,7 +211,7 @@ void mt_4g_Init(void);
 void mt_4g_pro(void);
 void mt_4g_Phone_Handup(void);
 void mt_4G_PhoneDial_Ctrl(unsigned char *pdata);
-void mt_4G_MesSend_Ctrl(unsigned char *pdata,unsigned char *Data);
+void mt_4G_MesSend_Ctrl(unsigned char *pdata);
 
 extern unsigned char GSM_SIGNAL;
 #endif

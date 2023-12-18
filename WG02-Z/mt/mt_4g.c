@@ -107,13 +107,16 @@ const unsigned char GSM_AT_Res[GSM_AT_RESPONSE_MAX][20]=
 
 volatile Queue16  GSM_TxIdxMsg;	
 volatile Queue1K  GSM_RxIdxMsg;
+volatile Queue16  GSMTxMessageIdMsg;									//发送短信的队列  (优先于打电话）
 
 unsigned char GSM_TxQueuePos;     										//发送数据位于队列的位置        	
 unsigned char GSM_TxBuff[GSM_TX_QUEUE_SUM][GSM_TX_BUFFSIZE_MAX];		//发送数组
 unsigned char GSM_RxBuff[MT_GSM_RXBUFFSIZE_MAX];						//接收数组
 
 unsigned char GSM_SIGNAL;												//SIM卡信号
-unsigned char GSM_MES_ALLRAM_FALG;										//短信或者报警标志位（两者优先于打电话）
+
+unsigned char Mes_Buff_Pos;												//短信发送缓存位置
+unsigned char GSM_Mes_Send_Buff[GSM_TX_QUEUE_SUM][GSM_TX_BUFFSIZE_MAX]; //短信发送内容缓存数组
 
 
 static void mt_GSM_DataPack(unsigned char cmd,unsigned char *pdata);
@@ -192,46 +195,45 @@ static unsigned char mt_GSM_GetSignal(unsigned char *p)
 *@return：无
 *@others：
 ********************************************************************************************/
-void mt_4G_MesSend_Ctrl(unsigned char *pdata,unsigned char *Data)
+void mt_4G_MesSend_Ctrl(unsigned char *pdata)
 {
 	unsigned char i;
-
-	if (GSM_Mes_SendSms.Step == GSM_STATE_SMS_SENT_READY)
-	{
-		memset(&GSM_Mes_SendSms.PhoneNo[0],0,Phone_Len);
-		for (i = 0; i < Phone_Len; i++)
-		{ //数字1-9
-			if(*pdata < 10)
-			{
-				GSM_Mes_SendSms.PhoneNo[i] = *pdata + 0x30;
-				pdata++;		
-			}else if(*pdata == 0xff)
-			{
-				GSM_Mes_SendSms.PhoneNo[i]  = *pdata;
-				break;
-			}
-		}
-
-
-		memset(&GSM_Mes_SendSms.Send_MesBuff[0],0,MQTT_SENTDATA_SIZE_MAX);
-		i = 0;
-		while(*Data != 0)
+	
+	for (i = 0; i < Phone_Len; i++)
+	{ //数字1-9
+		if(pdata[i] < 10)
 		{
-			GSM_Mes_SendSms.Send_MesBuff[i] = *Data;
-			i++;
-			Data++;
+			GSM_Mes_Send_Buff[Mes_Buff_Pos][i] = pdata[i] + 0x30;
+		}else if(pdata[i] == 0xff)
+		{
+			GSM_Mes_Send_Buff[Mes_Buff_Pos][i] = pdata[i];
+			break;
 		}
-		GSM_Mes_SendSms.Send_MesBuff[i] = '\0';
-		GSM_Mes_SendSms.Step = GSM_STATE_SMS_SENT_START;
-		
 	}
+
+	i = 20;
+	
+	while(pdata[i] != 0)
+	{
+		GSM_Mes_Send_Buff[Mes_Buff_Pos][i] = pdata[i];
+		i++;
+	}
+	GSM_Mes_Send_Buff[Mes_Buff_Pos][i] = '\0';
+	QueueDataIn(GSMTxMessageIdMsg,&Mes_Buff_Pos,1);	
+
+	Mes_Buff_Pos++;
+	if(Mes_Buff_Pos > GSM_TX_QUEUE_SUM)
+	{
+		Mes_Buff_Pos = 0;
+	}
+	
 	
 }
 
 /*******************************************************************************************
 *@description:发短信流程
 *@param[in]：
-*@return：0:电话拨打；0xff:空闲
+*@return：0:发短信；0xff:空闲
 *@others：
 ********************************************************************************************/
 static unsigned char mt_GSM_MesSend()
@@ -240,11 +242,20 @@ static unsigned char mt_GSM_MesSend()
 	static unsigned short Mes_timeDelay = 0;
 	unsigned char Phone_Number[Phone_Len];
 	unsigned char Mes_Buff[MQTT_SENTDATA_SIZE_MAX];
-	
+	static unsigned char ID;
+
+	if(QueueDataLen(GSMTxMessageIdMsg))
+	{	
+		if(GSM_Mes_SendSms.Step == GSM_STATE_SMS_SENT_READY)
+		{
+			GSM_Mes_SendSms.Step = GSM_STATE_SMS_SENT_START;
+			QueueDataOut(GSMTxMessageIdMsg,&ID); 
+		}	
+	}
 	switch (GSM_Mes_SendSms.Step)
 	{
 	case GSM_STATE_SMS_SENT_START:
-		GSM_MES_ALLRAM_FALG = TRUE;	
+	{		
 		Mes_timeDelay++;	
 		if(Mes_timeDelay > 200)		
 		{	//AT+CMGS="18320669227"
@@ -254,22 +265,30 @@ static unsigned char mt_GSM_MesSend()
 			memset(&Phone_Number[0],0,Phone_Len);
 
 			Phone_Number[kLoop++] = 0x22;	// "
-			while ((GSM_Mes_SendSms.PhoneNo[i] != 0xff))
+
+			// while ((GSM_Mes_SendSms.PhoneNo[i] != 0xff))
+			// {
+			// 	Phone_Number[kLoop++] = GSM_Mes_SendSms.PhoneNo[i++];
+			// }
+
+			while (GSM_Mes_Send_Buff[ID][i] != 0xff)
 			{
-				Phone_Number[kLoop++] = GSM_Mes_SendSms.PhoneNo[i++];
+				Phone_Number[kLoop++] = GSM_Mes_Send_Buff[ID][i++];
 			}
+			
 			Phone_Number[kLoop] = 0x22;		// "
 			Phone_Number[kLoop+1] = 0;
 			
 			mt_GSM_DataPack(EC200_AT_SMS_CMGS,&Phone_Number[0]);	
 			return 0;		
-		}		
+		}	
+	}	
 		break;
 		
 
 	case GSM_STATE_SMS_SENT_WRITE:
 		Mes_timeDelay++;	
-		i = 0;
+		i = 20;
 		kLoop = 1;
 			
 		if(Mes_timeDelay > 200)
@@ -280,10 +299,14 @@ static unsigned char mt_GSM_MesSend()
 				GSM_Mes_SendSms.MaxTimes--;	
 				memset(&Mes_Buff[0],0,MQTT_SENTDATA_SIZE_MAX);
 
-				while(GSM_Mes_SendSms.Send_MesBuff[i] != 0)
+				while (GSM_Mes_Send_Buff[ID][i] != 0)
 				{
-					Mes_Buff[kLoop ++] = GSM_Mes_SendSms.Send_MesBuff[i++];
-				}
+					Mes_Buff[kLoop++] = GSM_Mes_Send_Buff[ID][i++];
+				}				
+				// while(GSM_Mes_SendSms.Send_MesBuff[i] != 0)
+				// {
+				// 	Mes_Buff[kLoop ++] = GSM_Mes_SendSms.Send_MesBuff[i++];
+				// }
 				Mes_Buff[0] = i + 1;
 				
 				mt_GSM_DataPack(GSM_AT_SMS_SENTDATA,&Mes_Buff[0]);
@@ -311,8 +334,13 @@ static unsigned char mt_GSM_MesSend()
 		break;
 
 	case GSM_STATE_SMS_SENT_END:
-		GSM_Mes_SendSms.Step = GSM_STATE_SMS_SENT_READY;
-		GSM_MES_ALLRAM_FALG = FALSE;
+		Mes_timeDelay++;	
+		if(Mes_timeDelay > 500)
+		{
+			GSM_Mes_SendSms.Step = GSM_STATE_SMS_SENT_READY;
+			ID = 0;
+		}
+		
 		break;
 	}
 
@@ -382,7 +410,7 @@ unsigned char mt_GSM_PhoneCall()
 {	
 	unsigned char i;
 	static unsigned short Phone_timeDelay = 0;
-	if(GSM_MES_ALLRAM_FALG == FALSE)
+	if(!QueueDataLen(GSMTxMessageIdMsg))
 	{
 		switch (GSM_PhoneCall_SendSms.Step)
 		{
@@ -1088,8 +1116,6 @@ void GSM_MesPara_Init(void)
 {
 	
 	GSM_Mes_SendSms.MaxTimes = MT_GSM_ReSend_Time;
-	memset(&GSM_Mes_SendSms.PhoneNo[0],0,Phone_Len);
-	memset(&GSM_Mes_SendSms.Send_MesBuff[0],0,MQTT_SENTDATA_SIZE_MAX);
 }
 	
 
@@ -1120,11 +1146,13 @@ void mt_4g_Init(void)
 	GSM_SIGNAL = 0xff;
     ES200C_Var.powerKeytime = 0;
 	GSM_TxQueuePos = 0;
-	GSM_MES_ALLRAM_FALG = FALSE;
+	Mes_Buff_Pos = 0;
 	hal_usart_Uart2DateRxCBSRegister(mt_GSM_RxMsgInput);
 	QueueEmpty(GSM_TxIdxMsg);
 	QueueEmpty(GSM_RxIdxMsg);
+	QueueEmpty(GSMTxMessageIdMsg);
 	memset(&GSM_TxBuff[0], 0, sizeof(GSM_TX_BUFFSIZE_MAX));
+	memset(&GSM_Mes_Send_Buff[0], 0, sizeof(GSM_TX_BUFFSIZE_MAX));
 	
 	GSM_Para_Init();
     hal_GPIO_4GPowerKey_L(); 

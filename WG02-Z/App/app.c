@@ -90,8 +90,7 @@ static void temHum_icon_Display(unsigned char fuc)
 
 static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 {	
-	unsigned char test[Phone_Len];
-	unsigned char Mes[256];	
+	unsigned char test[256];
 
 	  switch((unsigned char)keys)
 	  {
@@ -123,20 +122,7 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 			}
 			break;	
 			case KEY4_LEFT:
-			{
-//				test[0] = 1;
-//				test[1] = 8;
-//				test[2] = 3;
-//				test[3] = 2;
-//				test[4] = 0;
-//				test[5] = 6;
-//				test[6] = 6;
-//				test[7] = 9;
-//				test[8] = 2;
-//				test[9] = 2;
-//				test[10] = 7;
-//				test[11] = 0xff;
-				
+			{			
 				test[0] = 1;
 				test[1] = 8;
 				test[2] = 3;
@@ -150,28 +136,77 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 				test[10] = 7;
 				test[11] = 0xff;
 
-				Mes[0] = 'p';
-				Mes[1] = 'r';
-				Mes[2] = 't';
-				Mes[3] = 't';
-				Mes[4] = 'e';
-				Mes[5] = 'y';
-				Mes[6] = ' ';
-				Mes[7] = 'w';
-				Mes[8] = 'i';
-				Mes[9] = 'f';
-				Mes[10] = 'e';
-				Mes[11] = 0;
-				mt_4G_MesSend_Ctrl(test,Mes);
+				test[20] = 'x';
+				test[21] = 'i';
+				test[22] = 'a';
+				test[23] = 'n';
+				test[24] = ' ';
+				test[25] = 'y';
+				test[26] = 'a';
+				test[27] = 'n';
+				test[28] = ' ';
+				test[29] = 'l';
+				test[30] = 'a';
+				test[31] = 'o';
+				test[32] = 'p';
+				test[33] = 'o';
+				test[34] = 0;
+				mt_4G_MesSend_Ctrl(test);
 			}
 			break;			
 			case KEY5:
 			{
+				test[0] = 1;
+				test[1] = 8;
+				test[2] = 3;
+				test[3] = 2;
+				test[4] = 0;
+				test[5] = 6;
+				test[6] = 6;
+				test[7] = 9;
+				test[8] = 2;
+				test[9] = 2;
+				test[10] = 7;
+				test[11] = 0xff;
 
+				test[20] = 'i';
+				test[21] = ' ';
+				test[22] = 'l';
+				test[23] = 'o';
+				test[24] = 'v';
+				test[25] = 'e';
+				test[26] = ' ';
+				test[27] = 'y';
+				test[28] = 'o';
+				test[29] = 'u';
+				test[30] = 0;
+				mt_4G_MesSend_Ctrl(test);
 			}
 			break;
 			case KEY6_RIGHT:
 			{
+				test[0] = 1;
+				test[1] = 8;
+				test[2] = 3;
+				test[3] = 2;
+				test[4] = 0;
+				test[5] = 6;
+				test[6] = 6;
+				test[7] = 9;
+				test[8] = 2;
+				test[9] = 2;
+				test[10] = 7;
+				test[11] = 0xff;
+
+				test[20] = 'f';
+				test[21] = 'o';
+				test[22] = 'r';
+				test[23] = 'e';
+				test[24] = 'v';
+				test[25] = 'e';
+				test[26] = 'r';
+				test[27] = 0;
+				mt_4G_MesSend_Ctrl(test);				
 			}
 			break;
 			case KEY7:
