@@ -1,5 +1,8 @@
 #include "mt_4g.h"
 #include "mt_api.h"
+#include "mt_mqtt.h"
+#include "mt_wifi.h"
+#include "mt_protocol.h"
 #include "hal_GPIO.H"
 #include "OS_System.h"
 #include "hal_uart.h"
@@ -38,13 +41,13 @@ const unsigned char GSM_AT_Send[EC200_AT_MAX][70]=
 
 	"AT+CLVL=3\0",											
  	"AT+CLVL=0\0", 
+	"AT+CSQ\0",	
 	//MQTT 初始化部分
 	//MQTT通讯部分
 	"AT+QMTCFG=\"version\",0,4\0",
 	"AT+QMTCFG=\"recv/mode\",0,0,1",
 	"AT+QMTCFG=\"send/mode\",0,0",	
 	
-	"AT+CSQ\0",	
 	"AT+QMTOPEN=0,\"",										//119.91.158.8\",1883",
 	"AT+QMTCONN=0,\"",										//rytwj01wwncy26A\",\"admin\",\"7d19d4f675ea0b05553a953bbd86b041\"",
 	"AT+QMTSUB=0,1,\"",										//NewFirmware_down\",0",
@@ -74,12 +77,11 @@ const unsigned char GSM_AT_Res[GSM_AT_RESPONSE_MAX][20]=
 	"+CREG: 0,1\0",
 	"+CGREG: 0,1\0",
 
-	"+QMTOPEN: 0,0\0",   ///OPEN	
+	"+QMTOPEN: 0,0\0",   
 	"+QMTCONN: 0,0,0\0",
 	"+QMTSUB: 0,1,0,0\0",
 	"+QMTPUBEX: 0,0,0\0",
-	"+QMTSTAT: 0,1\0",
-	"+QMTSTAT: 0,4\0",	
+	"+QMTSTAT: 0,1\0",			//MQTT连接断开
 	"+QMTRECV: 0,0,\0",
 	
 	"+CMTI:\0",			//收到新的短信
@@ -127,9 +129,368 @@ EC200C_value  ES200C_Var;
 //之前把结构体定义放在下面，结果发现GSM_RxBuff[]的值直接改变了GSM_PhoneCall_SendSms结构体所有变量的值
 //是因为全局变量GSM_RXBUFF里面的接收值越界导致结构体变量被改变，因为GSM_RxBuff[MT_GSM_RXBUFFSIZE_MAX]不小心改为GSM_TX_QUEUE_SUM导致数组越界
 str_Gsm_SendSms	 		 GSM_SendSms;
+str_Gsm_SendSms			 GSM_MQTT_SendSms;
+str_Gsm_SendSms	 		 GSM_Mes_SendSms;
 str_Gsm_Phone_SendSms	 GSM_PhoneCall_SendSms;
-str_Gsm_Mes_SendSms	 	 GSM_Mes_SendSms;
 
+
+
+
+/******************************************************************************MQTT部分**************************************************************/
+
+/*******************************************************************************************
+*@description:4G_MQTT的订阅主题接收到的信息处理
+*@param[in]：*p：WIFI_RxBuff;*Output:DataBuff;Len:数据长度
+*@return：处理后的信息的长度
+*@others：
+********************************************************************************************/
+void GSM_MQTT_Sub_RecPro(unsigned char *p,unsigned char *OutPut,unsigned char *Lenth)
+{
+	//"+QMTRECV: 0,0,\0",
+	//+QMTRECV: 0,0,"38FFD8055642363436310443_down",30,"AA000C2A0007E70C15040B252CFF55"
+	//处理:,30,AA~A55;
+	unsigned char *pdata;
+	unsigned char len = 0;
+
+	pdata = p;
+
+	while(*pdata != '"') 
+	{
+		pdata++;	
+	}
+	pdata++;
+
+	while(*pdata != '"')
+	{
+		pdata++;	
+	}			
+	pdata++;		// ,
+	pdata++;		// 3
+	
+	//记录数据长度
+	while(*pdata != ',')
+	{
+		if((*pdata >= '0') && (*pdata <= '9'))
+		{
+			len *= 10;
+			len += *pdata - '0';
+		}
+		pdata++;
+
+		// i++;
+		// if(i > 2)
+		// break;
+	}
+	
+	*Lenth = len;	
+	pdata++;
+	pdata++;
+	
+
+	while(len--)
+	{
+		*OutPut = *pdata;
+		OutPut ++;
+		pdata++;	
+	}	
+
+
+
+}
+
+
+/*******************************************************************************************
+*@description:MQTT发布信息函数
+*@param[in]：*buf：传入的数据（前2位为数据长度）
+*@return：无
+*@others：
+			//AT+MQTTPUB=0,"38FFFFFF3032533551310743_up","AA0006290000082755",2,0
+			//AT+MQTTPUB=0,\"
+********************************************************************************************/
+void mt_4g_Mqtt_SentDat(unsigned char Type ,unsigned char *buf)
+{
+	unsigned char mqttDataBuff[WIFI_TX_BUFFSIZE_MAX];
+	unsigned char i,idx,hchar,lchar;
+	unsigned short lon;					//传入数据的前2位为数据长度
+	
+	switch (Type)
+	{
+		case GSM_MQTT_PUB_AT:
+		{
+			if (GSM_MQTT_SendSms.Step == GSM_MQTT_PUB)
+			{
+				idx	=0;
+				i = 0;
+				while(mqtt_para.pubtopic[i])
+				{
+					mqttDataBuff[idx ++] = mqtt_para.pubtopic[i++];
+					if(i == MQTT_TPIC_SIZE_MAX)
+					break;	
+				}
+				mqttDataBuff[idx ++] = '\"';			
+				mqttDataBuff[idx ++] = ',';	
+				
+				lon = *buf<< 8; 
+				buf++;
+				lon += *buf; 
+				//这里Buf的数据长度为9，但模块接收是转化hex长度，所以要乘以2.
+				lon = 2*lon;
+				
+				mqttDataBuff[idx ++] = lon/10 + '0';
+				mqttDataBuff[idx ++] = lon%10 + 0x30;
+				mqttDataBuff[idx ++] = 0;
+				mt_GSM_DataPack(EC200_AT_MQTT_PUB,&mqttDataBuff[0]);
+			}
+			
+
+		}
+		break;
+		
+		case GSM_MQTT_PUB_DATA:
+			if(GSM_MQTT_SendSms.Step == GSM_MQTT_PUB_SENTDAT)
+			{
+				idx	= 0;
+				i = 0;
+				
+				lon = *buf<< 8; 
+				buf++;
+				lon += *buf;  
+				buf++;
+				//此处多加1，不然数组发送会少两位
+				mqttDataBuff[idx++] = 2*lon + 2;
+				while(lon--)
+				{
+					hexToAsciiConversion(*buf,&hchar,&lchar);
+					mqttDataBuff[idx++] = hchar;	
+					mqttDataBuff[idx++] = lchar;
+					buf ++;
+					if(idx >= (WIFI_TX_BUFFSIZE_MAX-6))
+						break;
+				}
+				//mqttDataBuff[idx ++] = 0x1A;
+				mqttDataBuff[idx ++] = 0;
+				
+				
+				mt_GSM_DataPack(EC200_AT_MQTT_SENTDATA,&mqttDataBuff[0]);
+				mt_mqtt_SetNewFlag(MQTT_REC_MESSAGE_NEW);
+			}
+		break;
+	}
+
+}
+
+
+
+
+
+
+/*******************************************************************************************
+*@description:MQTT-4G发送指令函数
+*@param[in]:
+*@return：无
+*@others：
+********************************************************************************************/
+static void mt_4g_Mqtt_Send_AT(void)
+{
+	unsigned char Mqtt_Buff[GSM_TX_BUFFSIZE_MAX];
+	static unsigned int Time_Delay_MqttSent = 0;
+	unsigned char i,j;
+
+	if(GSM_SendSms.Step == GSM_STATE_READY)
+	{
+		switch (GSM_MQTT_SendSms.Step)
+		{
+			case GSM_MQTT_OPEN:
+				Time_Delay_MqttSent ++;
+				if (Time_Delay_MqttSent > 200)
+				{
+					if (GSM_MQTT_SendSms.MaxTimes)
+					{
+						i = 0;
+						j = 0;
+						GSM_MQTT_SendSms.MaxTimes--;
+						memset(Mqtt_Buff,0,sizeof(Mqtt_Buff));
+						Time_Delay_MqttSent = 0;
+						//服务器IP
+						while (mqtt_para.serverIp[j])
+						{
+							Mqtt_Buff[i++] = mqtt_para.serverIp[j++]; 
+							if(j == MQTT_SERVERIP_SIZE_MAX)
+							{
+								break;
+							}
+						}
+						Mqtt_Buff[i++] = '\"';
+						Mqtt_Buff[i++] = ',';		
+
+						//服务器端口
+						j = 0;
+						while (mqtt_para.serverPort[j])
+						{
+							Mqtt_Buff[i++] = mqtt_para.serverPort[j++]; 
+							if(j == MQTT_SERVERPORT_SIZE_MAX)
+							{
+								break;
+							}
+						}
+						Mqtt_Buff[i++] = 0;
+						mt_GSM_DataPack(EC200_AT_MQTT_OPEN,&Mqtt_Buff[0]);
+					}else
+					{
+						GSM_MQTT_SendSms.Step = GSM_MQTT_OPEN;
+						GSM_MQTT_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+					}
+
+				}
+			break;
+
+			case GSM_MQTT_CONN:
+				Time_Delay_MqttSent ++;
+				if (Time_Delay_MqttSent > 100)
+				{
+					i = 0;
+					j = 0;
+					memset(Mqtt_Buff,0,sizeof(Mqtt_Buff));
+					Time_Delay_MqttSent = 0;
+
+					//客户端ID
+					while (mqtt_para.linkID[j])
+					{
+						Mqtt_Buff[i++] = mqtt_para.linkID[j++]; 
+						if(j == MQTT_LINKID_SIZE_MAX)
+						{
+							break;
+						}
+					}
+
+					//连发9次都失败就重启WIFI模块
+					if(mqtt_para.linkID[0] == 0x30)
+					{
+						mqtt_para.linkID[0] += 1;
+					}else{
+						if(mqtt_para.linkID[0] >= 0x39)
+						{
+							GSM_MQTT_SendSms.Step = GSM_MQTT_OPEN;
+							GSM_MQTT_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+							mqtt_para.linkID[0] = 0x30;	
+						}
+						mqtt_para.linkID[0] += 1;					
+					}
+					Mqtt_Buff[i++] = 'G';
+					Mqtt_Buff[i++] = '\"';
+					Mqtt_Buff[i++] = ',';
+					Mqtt_Buff[i++] = '\"';
+					j = 0;
+
+					//用户名
+					while (mqtt_para.username[j])
+					{
+						Mqtt_Buff[i++] = mqtt_para.username[j++]; 
+						if(j == MQTT_USERNAME_SIZE_MAX)
+						{
+							break;
+						}
+					}
+					Mqtt_Buff[i++] = '\"';
+					Mqtt_Buff[i++] = ',';
+					Mqtt_Buff[i++] = '\"';
+					j = 0;
+
+					//密码
+					while (mqtt_para.password[j])
+					{
+						Mqtt_Buff[i++] = mqtt_para.password[j++]; 
+						if(j == MQTT_PASSWORD_SIZE_MAX)
+						{
+							break;
+						}
+					}	
+					Mqtt_Buff[i++] = '\"';
+					Mqtt_Buff[i++] = 0;
+
+					mt_GSM_DataPack(EC200_AT_MQTT_QMTCNN,&Mqtt_Buff[0]);
+				}
+			break;
+
+			case GSM_MQTT_SUB:
+				Time_Delay_MqttSent ++;
+				if (Time_Delay_MqttSent > 100)
+				{
+					if (GSM_MQTT_SendSms.MaxTimes)
+					{
+						i = 0;
+						j = 0;
+						GSM_MQTT_SendSms.MaxTimes--;
+						memset(Mqtt_Buff,0,sizeof(Mqtt_Buff));
+						Time_Delay_MqttSent = 0;
+
+						while (mqtt_para.subtopic[j])
+						{
+							Mqtt_Buff[i++] = mqtt_para.subtopic[j++]; 
+							if(j == MQTT_TPIC_SIZE_MAX)
+							{
+								break;
+							}
+						}
+
+						Mqtt_Buff[i++] = '\"';
+						Mqtt_Buff[i++] = ',';
+						Mqtt_Buff[i++] = '0';
+						Mqtt_Buff[i++] = 0;
+						mt_GSM_DataPack(EC200_AT_MQTT_SUB,&Mqtt_Buff[0]);
+					}else
+					{
+						GSM_MQTT_SendSms.Step = GSM_MQTT_OPEN;			
+					}
+				}
+			break;
+
+			case GSM_MQTT_READY:
+				if (mt_wifi_GetState() != STEP_MQTT_PUB)
+				{
+					GSM_MQTT_SendSms.Step = GSM_MQTT_PUB;
+				}
+				
+			break;
+
+			case GSM_MQTT_PUB:
+				Time_Delay_MqttSent	++;
+				if(Time_Delay_MqttSent > Get_Ser_Time)  //1min同步一次
+				{
+					Time_Delay_MqttSent = 0;
+					MCU_GetTime_Server(GSM_MQTT_PUB_EN);
+					GSM_MQTT_SendSms.Step = GSM_MQTT_PUB_WAITSENTDAT;
+				}
+			break;
+
+			case GSM_MQTT_PUB_WAITSENTDAT:
+				Time_Delay_MqttSent ++;
+				if(Time_Delay_MqttSent > 200)
+				{
+					GSM_MQTT_SendSms.Step = GSM_MQTT_OPEN;
+					GSM_MQTT_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+					Time_Delay_MqttSent = 0;
+				}
+			break;
+
+			case GSM_MQTT_PUB_SENTDAT:
+				Time_Delay_MqttSent ++;
+				if(Time_Delay_MqttSent > 2)
+				{
+					Time_Delay_MqttSent = 0;
+					MCU_GetTime_Server(GSM_MQTT_PUB_DATA_EN);
+					GSM_MQTT_SendSms.Step = GSM_MQTT_PUB_END;
+				}
+			break;
+				
+			case	GSM_MQTT_PUB_END:
+				
+			break;
+				
+		
+		}
+	}
+}
 
 
 
@@ -165,22 +526,22 @@ static unsigned char mt_GSM_GetSignal(unsigned char *p)
 		}	
 	}
 
-		if(Value < 10)
-		{//信号很差
-			return 0;
-		}
-		else if(Value < 15)
-		{//有信号
-			return 1;
-		}
-		else if(Value < 20)
-		{//信号好
-			return 2;
-		}
-		else if(Value < 33)
-		{//信号很好
-			return 3;
-		}									
+	if(Value < 10)
+	{//信号很差
+		return 0;
+	}
+	else if(Value < 15)
+	{//有信号
+		return 1;
+	}
+	else if(Value < 20)
+	{//信号好
+		return 2;
+	}
+	else if(Value < 33)
+	{//信号很好
+		return 3;
+	}									
 	return 0xff;
 }
 
@@ -266,11 +627,6 @@ static unsigned char mt_GSM_MesSend()
 
 			Phone_Number[kLoop++] = 0x22;	// "
 
-			// while ((GSM_Mes_SendSms.PhoneNo[i] != 0xff))
-			// {
-			// 	Phone_Number[kLoop++] = GSM_Mes_SendSms.PhoneNo[i++];
-			// }
-
 			while (GSM_Mes_Send_Buff[ID][i] != 0xff)
 			{
 				Phone_Number[kLoop++] = GSM_Mes_Send_Buff[ID][i++];
@@ -303,14 +659,10 @@ static unsigned char mt_GSM_MesSend()
 				{
 					Mes_Buff[kLoop++] = GSM_Mes_Send_Buff[ID][i++];
 				}				
-				// while(GSM_Mes_SendSms.Send_MesBuff[i] != 0)
-				// {
-				// 	Mes_Buff[kLoop ++] = GSM_Mes_SendSms.Send_MesBuff[i++];
-				// }
+
 				Mes_Buff[0] = i + 1;
 				
 				mt_GSM_DataPack(GSM_AT_SMS_SENTDATA,&Mes_Buff[0]);
-				//做些延迟再发0X1A还是马上发？
 				mt_GSM_DataPack(GSM_AT_SMSENTCONTENT_END,0);
 				return 0;
 			}else{
@@ -535,8 +887,11 @@ unsigned char GSM_RxMsg_Analysis(unsigned char *pData,unsigned char *res,unsigne
 *@return：
 *@others：
 ********************************************************************************************/
-static void Wifi_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,unsigned short strlon)
+static void GSM_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,unsigned short strlon)
 {
+	static unsigned char len;
+	static unsigned char hexDataBuff[WIFI_RXBUFFSIZE_MAX],DataBuff[WIFI_RXBUFFSIZE_MAX];
+
 	switch((unsigned char)res)
 	{
 		case GSM_AT_RESPONSE_CPIN:
@@ -560,44 +915,61 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,u
 		}
 		break;
 
-		case GSM_AT_RESPONSE_MQTTOPEN:
+		case GSM_AT_RESPONSE_QMTOPEN:
 		{
- 
+			if(GSM_MQTT_SendSms.Step == GSM_MQTT_OPEN)
+			{
+				GSM_MQTT_SendSms.Step = GSM_MQTT_CONN;
+				GSM_MQTT_SendSms.MaxTimes = MT_GSM_ReSend_Time;	
+			}	 
 		}
 		break; 
 
 		case GSM_AT_RESPONSE_QMTCONN:
 		{
-			
+			if(GSM_MQTT_SendSms.Step == GSM_MQTT_CONN)
+			{
+				GSM_MQTT_SendSms.Step = GSM_MQTT_SUB;
+				GSM_MQTT_SendSms.MaxTimes = MT_GSM_ReSend_Time;	
+			}				
 		}
 		break;
 
 		case GSM_AT_RESPONSE_MQTTSUB:
 		{
-			
+			if(GSM_MQTT_SendSms.Step == GSM_MQTT_SUB)
+			{
+				GSM_MQTT_SendSms.Step = GSM_MQTT_READY;
+				GSM_MQTT_SendSms.MaxTimes = MT_GSM_ReSend_Time;	
+			}				
 		}
 		break; 
 
 		case GSM_AT_RESPONSE_MQTTBEX:
 		{
-		
+			GSM_MQTT_SendSms.Step = GSM_MQTT_READY;
 		}
 		break;
 
 		case GSM_AT_RESPONSE_QMTSTAT:
 		{
-		
+			GSM_MQTT_SendSms.Step = GSM_MQTT_OPEN;	
 		}
 		break;
 
-		case GSM_AT_RESPONSE_QMTSTAT_FAIL:
-		{ 
-		}
-		break;	
-
-
 		case GSM_AT_RESPONSE_QMTRECV:
 		{
+			if(GSM_MQTT_SendSms.Step == GSM_MQTT_PUB_END)
+			{
+				GSM_MQTT_Sub_RecPro(pData,DataBuff,&len);
+				if(!(len % 2))
+				{
+					asciiToHexConversion(DataBuff,hexDataBuff,len);			
+					mt_protocol_MqttRecHandle(&hexDataBuff[0],len/2);				
+				}
+				mt_mqtt_SetNewFlag(MQTT_REC_MESSAGE_NEW);	
+			}
+			
 		}
 		break;
 
@@ -618,7 +990,13 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,u
 			if (GSM_Mes_SendSms.Step == GSM_STATE_SMS_SENT_START)
 			{
 				GSM_Mes_SendSms.Step = GSM_STATE_SMS_SENT_WRITE;
-			}		
+			}	
+
+			if (GSM_MQTT_SendSms.Step == GSM_MQTT_PUB_WAITSENTDAT)
+			{
+				GSM_MQTT_SendSms.Step = GSM_MQTT_PUB_SENTDAT;		
+			}
+				
 		}
 		break;
 
@@ -707,12 +1085,12 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,u
 		{
 			switch (GSM_SendSms.Step)
 			{
-			case GSM_MQTT_INIT:
+			case GSM_STATE_READY:
 				GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
 				break;
 			
+			default :break;
 			}
-			
 		}
 		break;
 
@@ -793,7 +1171,7 @@ static void mt_GSM_DataPack(unsigned char cmd,unsigned char *pdata)
 				break;
 			}
 		}			
-	}else if(cmd == GSM_AT_SMS_SENTDATA)
+	}else if((cmd == GSM_AT_SMS_SENTDATA) || (cmd == EC200_AT_MQTT_SENTDATA))
 	{
 		GSM_TxMsgInput(pdata);
 	}else if(cmd == GSM_AT_SMSENTCONTENT_END)
@@ -910,7 +1288,7 @@ static void Mt_GSMRx_Pro(void)
 				{
 					if (Ret == 0)
 					{
-						Wifi_Rx_Response_Handle(&GSM_RxBuff[0],response,Rx_Data_len);
+						GSM_Rx_Response_Handle(&GSM_RxBuff[0],response,Rx_Data_len);
 					}
 				}		
 			}
@@ -937,7 +1315,7 @@ static void mt_4g_TxSend_AT(void)
 		case GSM_STATE_POWERON:
 		{
 			timeDelay++;	
-			if(timeDelay > 200)		//延时2秒	
+			if(timeDelay > 100)		//延时2秒	
 			{
 				timeDelay = 0;
 				if (GSM_SendSms.MaxTimes)
@@ -957,7 +1335,7 @@ static void mt_4g_TxSend_AT(void)
 		case GSM_STATE_INIT:
 		{
 			timeDelay++;	
-			if(timeDelay > 200)		//延时2秒	
+			if(timeDelay > 100)		//延时2秒	
 			{
 				timeDelay= 0;
 				i = 0;
@@ -973,7 +1351,7 @@ static void mt_4g_TxSend_AT(void)
 		case GSM_STATE_GET_CREG:
 		{
 			timeDelay++;
-			if(timeDelay > 200)		//延时2秒	
+			if(timeDelay > 100)		//延时2秒	
 			{
 				timeDelay= 0;
 				i = 0;
@@ -995,7 +1373,7 @@ static void mt_4g_TxSend_AT(void)
 		case GSM_STATE_GET_CGREG:
 		{
 			timeDelay++;
-			if(timeDelay > 200)		//延时2秒	
+			if(timeDelay > 100)		//延时2秒	
 			{
 				timeDelay= 0;
 				i = 0;
@@ -1022,30 +1400,28 @@ static void mt_4g_TxSend_AT(void)
 				timeDelay= 0;
 				i = 0;
 				
-				mt_GSM_DataPack(EC200_AT_GSN,&i);	
-				mt_GSM_DataPack(EC200_AT_CIMI,&i);	
-				mt_GSM_DataPack(EC200_AT_SMSINIT_CSCA,&i);
-				mt_GSM_DataPack(EC200_AT_SMSINIT_CNMI,&i);
+				//电话音量	
+				mt_GSM_DataPack(EC200_AT_DIAL_CLVL,&i);				
 				//短信初始化	
 				mt_GSM_DataPack(EC200_AT_SMSINIT_CMGF,&i);	
 				mt_GSM_DataPack(EC200_AT_SMSINIT_CCSMP,&i);	
 				mt_GSM_DataPack(EC200_AT_SMSINIT_CSCS,&i);				
-						
-				mt_GSM_DataPack(EC200_AT_DIAL_CLVL,&i);
+				//MQTT初始化
 				mt_GSM_DataPack(EC200_AT_MQTT_VERSION,&i);
 				mt_GSM_DataPack(EC200_AT_MQTT_RECMODE,&i);
 				mt_GSM_DataPack(EC200_AT_MQTT_SETMODE,&i);
+
 				GSM_Mes_SendSms.Step = GSM_STATE_SMS_SENT_READY;
 				GSM_PhoneCall_SendSms.Step = GSM_STATE_SMSDIAL_READY;
-				GSM_SendSms.Step = GSM_MQTT_INIT;
+				GSM_SendSms.Step = GSM_STATE_READY;
 			}	
 		}
 		break;
 
-		case GSM_MQTT_INIT:
+		case GSM_STATE_READY:
 		{
 			timeDelay++;
-			if(timeDelay > 2000)		//延时20S	
+			if(timeDelay > 2000)		//延时40s	
 			{
 				timeDelay= 0;
 				i = 0;
@@ -1129,6 +1505,9 @@ void GSM_Para_Init(void)
 {
 	GSM_SendSms.Step = GSM_STATE_POWERON;
 	GSM_SendSms.MaxTimes = MT_GSM_ReSend_Time;
+
+	GSM_MQTT_SendSms.Step = GSM_MQTT_OPEN;
+	GSM_MQTT_SendSms.MaxTimes = MT_GSM_ReSend_Time;
 	
 	GSM_MesPara_Init();
 	GSM_PhonePara_Init();
@@ -1165,6 +1544,7 @@ void mt_4g_pro(void)
 {
     EC200S_PutOnHandler();
 	mt_4g_TxSend_AT();
+	mt_4g_Mqtt_Send_AT();
 	Mt_GSMTx_Pro();
 	Mt_GSMRx_Pro();
 	

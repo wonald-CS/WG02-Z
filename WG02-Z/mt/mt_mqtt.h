@@ -12,7 +12,7 @@
 
 //typedef enum
 //{
-//	MQTT_UPEVENT_GET_TIME = (unsigned char)0,  ///
+//	MQTT_UPEVENT_GET_TIME = (unsigned char)0, 
 //	MQTT_UPEVENT_DISARM,
 //	MQTT_UPEVENT_ARM,
 //	MQTT_UPEVENT_HOMEARM,

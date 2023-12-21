@@ -27,7 +27,8 @@ typedef enum
 enum
 {
     WIFI_MQTT_EN,
-    GSM_MQTT_EN,
+    GSM_MQTT_PUB_EN,
+    GSM_MQTT_PUB_DATA_EN,
 };
 
 #pragma pack(1)       //取消结构体的默认对齐
@@ -76,6 +77,6 @@ typedef struct
 
 
 void MCU_GetTime_Server(unsigned char comType);
-void mt_protocol_WIFIMqttRecHandle(unsigned char* pdata,unsigned char len);
-
+void mt_protocol_MqttRecHandle(unsigned char* pdata,unsigned char len);
+void MQTT_Sub_RecPro(unsigned char *p,unsigned char *OutPut,unsigned char *Lenth);
 #endif

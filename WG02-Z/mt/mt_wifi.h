@@ -9,7 +9,7 @@
 
 #define WIFI_RXBUFFSIZE_MAX		    	800
 
-#define Get_Ser_Time					2500				//1Min
+#define Get_Ser_Time						1500				//30S
 #define Get_Ser_Time_Power				100
 
 
@@ -111,5 +111,6 @@ void mt_wifi_init(void);
 void mt_wifi_pro(void);
 void mt_wifi_changState(en_Esp12_sta sta);
 void mt_wifi_Mqtt_SentDat(unsigned char *buf);
+unsigned char mt_wifi_GetState(void);
 
 #endif

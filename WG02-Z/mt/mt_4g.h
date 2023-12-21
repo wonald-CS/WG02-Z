@@ -31,13 +31,13 @@ typedef enum
 	EC200_AT_SMSINIT_CNMI,						//"AT+CNMI=2,1,0,1,0\0",	
 	EC200_AT_SMS_CMGS,							//"AT+CMGS=\0"	
 
-  	EC200_AT_DIAL_CLVL,     					//"AT+CLVL=5\0",								//33 扬声器等级最低
+  	EC200_AT_DIAL_CLVL,     					//"AT+CLVL=2\0",								
 	EC200_AT_DIAL_CLVL_CLOSE,     				//"AT+CLVL=0\0",
+	EC200_AT_CSQ,         						//"AT+CSQ\0",									//获取SIM卡信号（若初始化后拔出SIM卡，CSQ一样会有正常的返回值）	
 	EC200_AT_MQTT_VERSION,       				//"AT+QMTCFG=\"version\",0,4\0",
 	EC200_AT_MQTT_RECMODE,      				//"AT+QMTCFG=\"recv/mode\",0,0,1",
 	EC200_AT_MQTT_SETMODE,       				//"AT+QMTCFG=\"send/mode\",0,0",	
-	
-	EC200_AT_CSQ,         						//"AT+CSQ\0",									//获取SIM卡信号（若初始化后拔出SIM卡，CSQ一样会有正常的返回值）			
+		
 
 	////MQTT通讯部分
 	EC200_AT_MQTT_OPEN,       					//"AT+QMTOPEN=0,\"119.91.158.8\",1883",
@@ -72,13 +72,12 @@ typedef enum
 	GSM_AT_RESPONSE_CPIN,
 	GSM_AT_RESPONSE_CREG,				//"+CREG: 0,1\0",
 	GSM_AT_RESPONSE_CGREG,				//"+CGREG: 0,1\0",
-	GSM_AT_RESPONSE_MQTTOPEN,
 	
-	GSM_AT_RESPONSE_QMTCONN,		//"+QMTSTAT: 0,1\0",		
+	GSM_AT_RESPONSE_QMTOPEN,
+	GSM_AT_RESPONSE_QMTCONN,			//"+QMTSTAT: 0,1\0",		
 	GSM_AT_RESPONSE_MQTTSUB,			//"+QMTSUB: 0,1,0,0\0",
 	GSM_AT_RESPONSE_MQTTBEX,			//"+QMTPUBEX: 0,0,0\0",
 	GSM_AT_RESPONSE_QMTSTAT,
-	GSM_AT_RESPONSE_QMTSTAT_FAIL,	
 	GSM_AT_RESPONSE_QMTRECV,			//"+QMTRECV: 0,0,\0",
 	 
 	
@@ -116,18 +115,16 @@ typedef enum
 	GSM_STATE_GET_CREG,
 	GSM_STATE_GET_CGREG,
 	GSM_STATE_SMSMQTT_INIT,
+	GSM_STATE_READY,
 
 	///MQTT 部分
-	GSM_MQTT_INIT,
 	GSM_MQTT_OPEN,
 	GSM_MQTT_CONN,
-	GSM_MQTT_SUB1,
-	GSM_MQTT_SUB2,
+	GSM_MQTT_SUB,
 	GSM_MQTT_READY,
 	GSM_MQTT_PUB,
 	GSM_MQTT_PUB_WAITSENTDAT,
 	GSM_MQTT_PUB_SENTDAT,
-	GSM_MQTT_PUB_DELAY,
 	GSM_MQTT_PUB_END,
 
 	//报警拨打电话
@@ -142,7 +139,6 @@ typedef enum
 	GSM_STATE_DIAL_ALARM_END,	
 	
 	//报警主机电话功能
-	//GSM_STATE_PHONECOMEIN_START,
 	GSM_STATE_DIAL_ATD,					//拨号
 	GSM_STATE_DIAL_RING,				//振铃
 	GSM_STATE_DIAL_CALLING,				//通话
@@ -158,12 +154,11 @@ typedef enum
 	GSM_STATE_SMS_SENT_FAIL,
 	GSM_STATE_SMS_SENT_END,		
 	//报警拨打电话部分
-	GSM_STATE_ALARM_HANDLE,//SIM卡处于处理报警信息处理
-	GSM_STATE_ALARM_HANDLEDLEY,	//备注：通过测试证明，发送短信结束后需要等待一段时间之后才可以操作其他的拨号或者发送短信的任务，否则操作会失败，所以加了GSM_STATE_ALARM_HANDLEDLEY
+	GSM_STATE_ALARM_HANDLE,				//SIM卡处于处理报警信息处理
+	GSM_STATE_ALARM_HANDLEDLEY,			//备注：通过测试证明，发送短信结束后需要等待一段时间之后才可以操作其他的拨号或者发送短信的任务，否则操作会失败，所以加了GSM_STATE_ALARM_HANDLEDLEY
 	//电话拨入设置
-	//GSM_STATE_PHONECOMEIN_START,
 	GSM_STATE_PHONECOMEIN_ATA,
-	GSM_STATE_PHONECOMEIN_PUTINPW,//输入密码部分	
+	GSM_STATE_PHONECOMEIN_PUTINPW,		//输入密码部分	
 	GSM_STATE_PHONECOMEIN_CALLING,	
 	GSM_STATE_PHONECOMEIN_ATH,	
 	GSM_STATE_PHONECOMEIN_END,
@@ -177,6 +172,11 @@ typedef enum
 }GSM_STATE_TYPE;
 
 
+enum
+{
+	GSM_MQTT_PUB_AT,
+	GSM_MQTT_PUB_DATA,
+};
 
 typedef struct 
 {
@@ -190,7 +190,6 @@ typedef struct
 	unsigned char MaxTimes;               				 //发送的最大的次数	
 }str_Gsm_SendSms;
 
-
 typedef struct
 {
 	unsigned char Step;				  	 				 //当前步骤
@@ -199,19 +198,12 @@ typedef struct
 }str_Gsm_Phone_SendSms;
 
 
-typedef struct
-{
-	unsigned char Step;				  	 				 //当前步骤
-	unsigned char MaxTimes;               				 //发送的最大的次数	
-}str_Gsm_Mes_SendSms;
-
-
-
 void mt_4g_Init(void);
 void mt_4g_pro(void);
 void mt_4g_Phone_Handup(void);
 void mt_4G_PhoneDial_Ctrl(unsigned char *pdata);
 void mt_4G_MesSend_Ctrl(unsigned char *pdata);
+void mt_4g_Mqtt_SentDat(unsigned char Type ,unsigned char *buf);
 
 extern unsigned char GSM_SIGNAL;
 #endif

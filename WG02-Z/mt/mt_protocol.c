@@ -1,8 +1,10 @@
 #include "mt_protocol.h"
 #include "mt_wifi.h"
-#include "string.h"
+#include "mt_4G.h"
 #include "para.h"
 #include "mt_api.h"
+#include "string.h"
+
 
 Master_Server_Para Master_Server_Str;
 Server_Time_Para   Server_Time;
@@ -66,14 +68,16 @@ static void mt_protocol_DataPack(unsigned char comType)
     
 
 
-    if(comType == 0)
+    if(comType == WIFI_MQTT_EN)
 	{//0009AA0006290000082755
 		mt_wifi_Mqtt_SentDat(DataBuff);
-	}
-	else
+	}else if(comType == GSM_MQTT_PUB_EN)
 	{
-		//mt_4g_protocol_DataSet(DataBuff);
-	}
+        mt_4g_Mqtt_SentDat(GSM_MQTT_PUB_AT,DataBuff);		
+	}else if (comType == GSM_MQTT_PUB_DATA_EN)
+    {
+        mt_4g_Mqtt_SentDat(GSM_MQTT_PUB_DATA,DataBuff);
+    }
 }
 
 
@@ -95,11 +99,11 @@ void MCU_GetTime_Server(unsigned char comType)
     Master_Server_Str.Data_SelfMake.Data_UTC = 0x0008;
     Master_Server_Str.Data_Tail = 0x55;
 
-
-    mt_protocol_DataPack(WIFI_MQTT_EN);
+    mt_protocol_DataPack(comType);
 
     
 }
+
 
 
 /*******************************************************************************************
@@ -108,7 +112,7 @@ void MCU_GetTime_Server(unsigned char comType)
 *@return：无
 *@others：
 ********************************************************************************************/
-void mt_protocol_WIFIMqttRecHandle(unsigned char* pdata,unsigned char len)
+void mt_protocol_MqttRecHandle(unsigned char* pdata,unsigned char len)
 {
     Server_Time_Para *pstData = NULL;
     unsigned short Year;

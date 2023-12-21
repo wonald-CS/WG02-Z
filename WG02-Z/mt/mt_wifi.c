@@ -134,6 +134,18 @@ void mt_wifi_Mqtt_Step(WIFI_mqtt_step step)
 
 
 /*******************************************************************************************
+*@description:WIFI步骤获取
+*@param[in]：sta：改变的枚举值
+*@return：无
+*@others：
+********************************************************************************************/
+unsigned char mt_wifi_GetState(void)
+{
+	return MQTT_Step;
+}
+
+
+/*******************************************************************************************
 *@description:WIFI状态改变
 *@param[in]：sta：改变的枚举值
 *@return：无
@@ -461,10 +473,10 @@ unsigned char Mqtt_Step_Pro(void)
 		
 		case STEP_MQTT_CONF:
 			Time_Delay_MqttSent ++;
-			i = 0;
-			j = 0;
 			if (Time_Delay_MqttSent > 300)
 			{
+				i = 0;
+				j = 0;
 				Time_Delay_MqttSent = 0;
 				while (mqtt_para.linkID[j])
 				{
@@ -534,10 +546,10 @@ unsigned char Mqtt_Step_Pro(void)
 
 		case STEP_MQTT_CONN:
 			Time_Delay_MqttSent ++;
-			i = 0;
-			j = 0;
 			if (Time_Delay_MqttSent > 300)
 			{
+				i = 0;
+				j = 0;
 				Time_Delay_MqttSent = 0;
 				//如果超过3次MQTT连接没有接收到应答OK，则复位WIFI。
 				if (Resend_Time > 3)
@@ -581,12 +593,11 @@ unsigned char Mqtt_Step_Pro(void)
 
 		case STEP_MQTT_SUB:
 			Time_Delay_MqttSent ++;
-			i = 0;
-			j = 0;
 			if (Time_Delay_MqttSent > 200)
 			{
 				Time_Delay_MqttSent = 0;
-				
+				i = 0;
+				j = 0;
 				while (mqtt_para.subtopic[j])
 				{
 					Mqtt_Buff[i++] = mqtt_para.subtopic[j++]; 
@@ -743,7 +754,7 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 			if(!(len % 2))
 			{
 				asciiToHexConversion(DataBuff,hexDataBuff,len);			
-				mt_protocol_WIFIMqttRecHandle(&hexDataBuff[0],len/2);				
+				mt_protocol_MqttRecHandle(&hexDataBuff[0],len/2);				
 			}
 			mt_mqtt_SetNewFlag(MQTT_REC_MESSAGE_NEW);		
 		}
