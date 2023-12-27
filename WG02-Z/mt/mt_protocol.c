@@ -107,7 +107,7 @@ void MCU_GetTime_Server(unsigned char comType)
 
 
 /*******************************************************************************************
-*@description:WIFI的mqtt的数据处理
+*@description:mqtt的数据处理
 *@param[in]：*pdata: 接收的数据,len：数据长度
 *@return：无
 *@others：

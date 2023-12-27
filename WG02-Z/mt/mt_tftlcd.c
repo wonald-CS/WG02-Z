@@ -8,109 +8,104 @@ unsigned char ColorBuf[640];
 
 void mt_tftlcd_init(void)
 {
-  	hal_tftlcdConfig();//初始化GPIO
-		hal_tftlcd_Delay(10000);
-		hal_oled_RestL();//复位
-		hal_tftlcd_Delay(10000);
-		hal_oled_RestH();
-		hal_tftlcd_Delay(100);
+	hal_tftlcdConfig();//初始化GPIO
+	hal_tftlcd_Delay(10000);
+	hal_oled_RestL();//复位
+	hal_tftlcd_Delay(10000);
+	hal_oled_RestH();
+	hal_tftlcd_Delay(100);
 
 	//************* Start Initial Sequence **********//
-		LCD_WR_REG(0x11);
-		hal_tftlcd_Delay(10000);//delay_ms(100); //Delay 120ms
-		LCD_WR_REG(0X36);// Memory Access Control
-		if(USE_HORIZONTAL==0)LCD_WR_DATA8(0x00);
-		else if(USE_HORIZONTAL==1)LCD_WR_DATA8(0xC0);
-		else if(USE_HORIZONTAL==2)LCD_WR_DATA8(0x70);
-		else LCD_WR_DATA8(0xA0);
-		LCD_WR_REG(0X3A);
-	 // LCD_WR_DATA8(0X03);   //12bit
-		LCD_WR_DATA8(0X05);  
-		//--------------------------------ST7789S Frame rate setting-------------------------
+	LCD_WR_REG(0x11);
+	hal_tftlcd_Delay(10000);//delay_ms(100); //Delay 120ms
+	LCD_WR_REG(0X36);// Memory Access Control
+	if(USE_HORIZONTAL==0)LCD_WR_DATA8(0x00);
+	else if(USE_HORIZONTAL==1)LCD_WR_DATA8(0xC0);
+	else if(USE_HORIZONTAL==2)LCD_WR_DATA8(0x70);
+	else LCD_WR_DATA8(0xA0);
+	LCD_WR_REG(0X3A);
+	// LCD_WR_DATA8(0X03);   //12bit
+	LCD_WR_DATA8(0X05);  
+	//--------------------------------ST7789S Frame rate setting-------------------------
 
-		LCD_WR_REG(0xb2);
-		LCD_WR_DATA8(0x0c);
-		LCD_WR_DATA8(0x0c);
-		LCD_WR_DATA8(0x00);
-		LCD_WR_DATA8(0x33);
-		LCD_WR_DATA8(0x33);
+	LCD_WR_REG(0xb2);
+	LCD_WR_DATA8(0x0c);
+	LCD_WR_DATA8(0x0c);
+	LCD_WR_DATA8(0x00);
+	LCD_WR_DATA8(0x33);
+	LCD_WR_DATA8(0x33);
 
-		LCD_WR_REG(0xb7);
-		LCD_WR_DATA8(0x35);
-		//---------------------------------ST7789S Power setting-----------------------------
+	LCD_WR_REG(0xb7);
+	LCD_WR_DATA8(0x35);
+	//---------------------------------ST7789S Power setting-----------------------------
 
-		LCD_WR_REG(0xbb);
-		LCD_WR_DATA8(0x35);
+	LCD_WR_REG(0xbb);
+	LCD_WR_DATA8(0x35);
 
-		LCD_WR_REG(0xc0);
-		LCD_WR_DATA8(0x2c);
+	LCD_WR_REG(0xc0);
+	LCD_WR_DATA8(0x2c);
 
-		LCD_WR_REG(0xc2);
-		LCD_WR_DATA8(0x01);
+	LCD_WR_REG(0xc2);
+	LCD_WR_DATA8(0x01);
 
-		LCD_WR_REG(0xc3);
-		LCD_WR_DATA8(0x13);
+	LCD_WR_REG(0xc3);
+	LCD_WR_DATA8(0x13);
 
-		LCD_WR_REG(0xc4);
-		LCD_WR_DATA8(0x20);
+	LCD_WR_REG(0xc4);
+	LCD_WR_DATA8(0x20);
 
-		LCD_WR_REG(0xc6);
-		LCD_WR_DATA8(0x0f);
+	LCD_WR_REG(0xc6);
+	LCD_WR_DATA8(0x0f);
 
-		LCD_WR_REG(0xca);
-		LCD_WR_DATA8(0x0f);
+	LCD_WR_REG(0xca);
+	LCD_WR_DATA8(0x0f);
 
-		LCD_WR_REG(0xc8);
-		LCD_WR_DATA8(0x08);
+	LCD_WR_REG(0xc8);
+	LCD_WR_DATA8(0x08);
 
-		LCD_WR_REG(0x55);
-		LCD_WR_DATA8(0x90);
+	LCD_WR_REG(0x55);
+	LCD_WR_DATA8(0x90);
 
-		LCD_WR_REG(0xd0);
-		LCD_WR_DATA8(0xa4);
-		LCD_WR_DATA8(0xa1);
-		//--------------------------------ST7789S gamma setting------------------------------
-		LCD_WR_REG(0xe0);
-		LCD_WR_DATA8(0xd0);
-		LCD_WR_DATA8(0x00);
-		LCD_WR_DATA8(0x06);
-		LCD_WR_DATA8(0x09);
-		LCD_WR_DATA8(0x0b);
-		LCD_WR_DATA8(0x2a);
-		LCD_WR_DATA8(0x3c);
-		LCD_WR_DATA8(0x55);
-		LCD_WR_DATA8(0x4b);
-		LCD_WR_DATA8(0x08);
-		LCD_WR_DATA8(0x16);
-		LCD_WR_DATA8(0x14);
-		LCD_WR_DATA8(0x19);
-		LCD_WR_DATA8(0x20);
-		LCD_WR_REG(0xe1);
-		LCD_WR_DATA8(0xd0);
-		LCD_WR_DATA8(0x00);
-		LCD_WR_DATA8(0x06);
-		LCD_WR_DATA8(0x09);
-		LCD_WR_DATA8(0x0b);
-		LCD_WR_DATA8(0x29);
-		LCD_WR_DATA8(0x36);
-		LCD_WR_DATA8(0x54);
-		LCD_WR_DATA8(0x4b);
-		LCD_WR_DATA8(0x0d);
-		LCD_WR_DATA8(0x16);
-		LCD_WR_DATA8(0x14);
-		LCD_WR_DATA8(0x21);
-		LCD_WR_DATA8(0x20);
-		LCD_WR_REG(0x29);
-		hal_Oled_Display_on();//打开背光
+	LCD_WR_REG(0xd0);
+	LCD_WR_DATA8(0xa4);
+	LCD_WR_DATA8(0xa1);
+	//--------------------------------ST7789S gamma setting------------------------------
+	LCD_WR_REG(0xe0);
+	LCD_WR_DATA8(0xd0);
+	LCD_WR_DATA8(0x00);
+	LCD_WR_DATA8(0x06);
+	LCD_WR_DATA8(0x09);
+	LCD_WR_DATA8(0x0b);
+	LCD_WR_DATA8(0x2a);
+	LCD_WR_DATA8(0x3c);
+	LCD_WR_DATA8(0x55);
+	LCD_WR_DATA8(0x4b);
+	LCD_WR_DATA8(0x08);
+	LCD_WR_DATA8(0x16);
+	LCD_WR_DATA8(0x14);
+	LCD_WR_DATA8(0x19);
+	LCD_WR_DATA8(0x20);
+	LCD_WR_REG(0xe1);
+	LCD_WR_DATA8(0xd0);
+	LCD_WR_DATA8(0x00);
+	LCD_WR_DATA8(0x06);
+	LCD_WR_DATA8(0x09);
+	LCD_WR_DATA8(0x0b);
+	LCD_WR_DATA8(0x29);
+	LCD_WR_DATA8(0x36);
+	LCD_WR_DATA8(0x54);
+	LCD_WR_DATA8(0x4b);
+	LCD_WR_DATA8(0x0d);
+	LCD_WR_DATA8(0x16);
+	LCD_WR_DATA8(0x14);
+	LCD_WR_DATA8(0x21);
+	LCD_WR_DATA8(0x20);
+	LCD_WR_REG(0x29);
+	hal_Oled_Display_on();//打开背光
 
-		//LCD_Fill(0,0,LCD_W,LCD_H,YELLOW);
-		hal_Tftlcd_Clear();
-    	LCD_ShowPicture32PixFont(COOR_ICON_AC_X,COOR_ICON_AC_Y,ICON_32X32_ACLINK,HUE_LCD_FONT,HUE_LCD_BACK,0);
-		LCD_ShowPicture32PixFont(COOR_ICON_BAT_X,COOR_ICON_BAT_Y,ICON_32X32_BAT_LEVEL5,HUE_LCD_FONT,HUE_LCD_BACK,0);
-		LCD_ShowPicture32PixFont(COOR_ICON_WIFI_X,COOR_ICON_WIFI_Y,ICON_32X32_WIFI_S4,HUE_LCD_FONT,HUE_LCD_BACK,0);
-		LCD_ShowPicture32PixFont(COOR_ICON_SIM_X,COOR_ICON_SIM_Y,ICON_32X32_GSM_NOCARD,HUE_LCD_FONT,HUE_LCD_BACK,0);
-		LCD_ShowPicture32PixFont(COOR_ICON_SERVER_X,COOR_ICON_SERVER_Y,ICON_32X32_SERVER,HUE_LCD_FONT,HUE_LCD_BACK,0);
-		LCD_ShowString(COOR_ICON_SYSTEMODE_X,COOR_ICON_SYSTEMODE_Y," DISARM ",HUE_LCD_FONT,HUE_LCD_BACK,48,0); 
+	//LCD_Fill(0,0,LCD_W,LCD_H,YELLOW);
+	hal_Tftlcd_Clear();
+	LCD_ShowString(COOR_ICON_SYSTEMODE_X,COOR_ICON_SYSTEMODE_Y," DISARM ",HUE_LCD_FONT,HUE_LCD_BACK,48,0); 
 } 
 
 /******************************************************************************
@@ -147,13 +142,14 @@ void LCD_Fill(unsigned short xsta,unsigned short ysta,unsigned short xend,unsign
 	unsigned short i; 
 	LCD_Address_Set(xsta,ysta,xend-1,yend-1);//设置显示范围
 	for(i=0;i<xend;i++)
-  {
+  	{
 		ColorBuf[i++] = color>>8;
 		ColorBuf[i] = color;
 	}
+
 	for(i=ysta;i<yend*2;i++)
 	{		
-		 DMA_SPI3_TX(ColorBuf,xend);
+		DMA_SPI3_TX(ColorBuf,xend);
 	}	
 }
 

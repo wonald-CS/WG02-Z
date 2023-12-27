@@ -20,7 +20,7 @@ void mt_task(void)
 {
 	mt_lora_Pro();
 	mt_wifi_pro();
-	mt_4g_pro();
+	//mt_4g_pro();
 }
 
 

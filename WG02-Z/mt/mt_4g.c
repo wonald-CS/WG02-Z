@@ -116,6 +116,7 @@ unsigned char GSM_TxBuff[GSM_TX_QUEUE_SUM][GSM_TX_BUFFSIZE_MAX];		//发送数组
 unsigned char GSM_RxBuff[MT_GSM_RXBUFFSIZE_MAX];						//接收数组
 
 unsigned char GSM_SIGNAL;												//SIM卡信号
+unsigned char GSM_SERVAL_STATUS;										//GSM服务状态
 
 unsigned char Mes_Buff_Pos;												//短信发送缓存位置
 unsigned char GSM_Mes_Send_Buff[GSM_TX_QUEUE_SUM][GSM_TX_BUFFSIZE_MAX]; //短信发送内容缓存数组
@@ -930,6 +931,7 @@ static void GSM_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,un
 			if(GSM_MQTT_SendSms.Step == GSM_MQTT_CONN)
 			{
 				GSM_MQTT_SendSms.Step = GSM_MQTT_SUB;
+				GSM_SERVAL_STATUS = TRUE;
 				GSM_MQTT_SendSms.MaxTimes = MT_GSM_ReSend_Time;	
 			}				
 		}
@@ -954,6 +956,7 @@ static void GSM_Rx_Response_Handle(unsigned char *pData,GSM_ATres_TYPEDEF res,un
 		case GSM_AT_RESPONSE_QMTSTAT:
 		{
 			GSM_MQTT_SendSms.Step = GSM_MQTT_OPEN;	
+			GSM_SERVAL_STATUS = FALSE;
 		}
 		break;
 
@@ -1526,6 +1529,7 @@ void mt_4g_Init(void)
     ES200C_Var.powerKeytime = 0;
 	GSM_TxQueuePos = 0;
 	Mes_Buff_Pos = 0;
+	GSM_SERVAL_STATUS = FALSE;
 	hal_usart_Uart2DateRxCBSRegister(mt_GSM_RxMsgInput);
 	QueueEmpty(GSM_TxIdxMsg);
 	QueueEmpty(GSM_RxIdxMsg);
@@ -1549,19 +1553,3 @@ void mt_4g_pro(void)
 	Mt_GSMRx_Pro();
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

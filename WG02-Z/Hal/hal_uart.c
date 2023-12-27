@@ -276,7 +276,7 @@ void USART1_PutInDebugString(unsigned char pData[],unsigned char len)
 {
 	 if((len + QueueDataLen(DebugTxMsg)) < 512)
 	 {
-			QueueDataIn(DebugTxMsg,(unsigned char *)pData,len);	
+		QueueDataIn(DebugTxMsg,(unsigned char *)pData,len);	
 	 }
 }
 

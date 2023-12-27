@@ -15,6 +15,9 @@
         "mt_protocol.h": "c",
         "para.h": "c",
         "hal_led.h": "c",
-        "hal_uart.h": "c"
+        "hal_uart.h": "c",
+        "app.h": "c",
+        "hal_al6630.h": "c",
+        "hal_key.h": "c"
     }
 }

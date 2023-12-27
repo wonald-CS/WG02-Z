@@ -3,12 +3,14 @@
 #include "hal_key.h"
 #include "hal_adc.h"
 #include "hal_gpio.h"
+#include "hal_wtn6.h"
 #include "mt_tftlcd.h"
 #include "mt_lora.h"
 #include "lcdfont.h"
 #include "mt_wifi.h"
 #include "para.h"
 #include "mt_4G.h"
+#include "OS_System.h"
 #include "string.h"
 
 
@@ -17,6 +19,7 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta);
 static void PowerState_icon_Display(void);
 static void	showSystemTime(void);
 static void Gsm_icon_Display(void);
+static void Wifi_icon_Display(void);
 
 static str_LoraAppNetState stgMenu_LoraDetectorApplyNetPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
 static unsigned char str_lora_loracommPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
@@ -31,10 +34,26 @@ void app_task_init(void)
 void app_task(void)
 {
 	showSystemTime();
-	temHum_icon_Display(0);
+	temHum_icon_Display(1);
 	PowerState_icon_Display();
 	Gsm_icon_Display();
+	Wifi_icon_Display();
+
 }
+
+
+//WIFI信号强弱具体显示可以通过AT+CWLAP=获取信息，通过检索出当前连接WIFI的信息可以做WIFI信号强弱。
+//目前只显示有无连接的状态
+static void Wifi_icon_Display(void)
+{
+	if((mt_wifi_GetState()==ESP12_STA_RESET) || (mt_wifi_GetState()==ESP12_STA_WIFI_POWER))
+	{
+		LCD_ShowPicture32PixFont(COOR_ICON_WIFI_X,COOR_ICON_WIFI_Y,ICON_32X32_CLEAR,HUE_LCD_FONT,HUE_LCD_BACK,0);
+	}else{
+		LCD_ShowPicture32PixFont(COOR_ICON_WIFI_X,COOR_ICON_WIFI_Y,ICON_32X32_WIFI_S4,HUE_LCD_FONT,HUE_LCD_BACK,0);
+	}
+}
+
 
 
 static void temHum_icon_Display(unsigned char fuc)
@@ -85,6 +104,7 @@ static void temHum_icon_Display(unsigned char fuc)
 		displayBuf[idx ++] = '%';
 		displayBuf[idx ++] = 0;		
 		LCD_ShowString(135,3,displayBuf,HUE_LCD_FONT,HUE_LCD_BACK,24,0);		
+		
 	}
 }
 
@@ -180,19 +200,34 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 			break;			
 			case KEY_DISARM:
 			{
-				
+				LCD_ShowString(COOR_ICON_SYSTEMODE_X,COOR_ICON_SYSTEMODE_Y," DISARM ",HUE_LCD_FONT,HUE_LCD_BACK,48,0);
+				if((sta != KEY_CLICK_RELEASE) && (sta != KEY_LONG_PRESS_RELEASE))
+				{
+					hal_Wtn6_PlayVolue(WTN6_DISARM);	
+				}	
+						
 			}
 			break;
 			
 			case KEY_HOMEARM:
 			{
-			 
+				LCD_ShowString(COOR_ICON_SYSTEMODE_X,COOR_ICON_SYSTEMODE_Y,"HOMEARM ",HUE_LCD_FONT,HUE_LCD_BACK,48,0);
+				if((sta != KEY_CLICK_RELEASE) && (sta != KEY_LONG_PRESS_RELEASE))
+				{
+					hal_Wtn6_PlayVolue(WTN6_HOMEARM);	
+				}	
+								 
 			}
 			break;
 			
-			case KEY_AWARARM:
+			case KEY_AWAYARM:
 			{
-			
+				LCD_ShowString(COOR_ICON_SYSTEMODE_X,COOR_ICON_SYSTEMODE_Y,"AWAYARM ",HUE_LCD_FONT,HUE_LCD_BACK,48,0);	
+				if((sta != KEY_CLICK_RELEASE) && (sta != KEY_LONG_PRESS_RELEASE))
+				{
+					hal_Wtn6_PlayVolue(WTN6_AWAYARM);			
+				}
+						
 			}
 			break;
 			
@@ -221,7 +256,8 @@ static unsigned char str_lora_loracommPro(en_lora_eventTypedef event,str_cmdAppl
 {
 	return 1;
 }
-/////Lora???????????
+
+
 static str_LoraAppNetState stgMenu_LoraDetectorApplyNetPro(en_lora_eventTypedef event,str_cmdApplyNet pData)
 {
 	str_LoraAppNetState loraApplyNetSta;	
@@ -371,7 +407,16 @@ static void showSystemTime(void)
 		case 6:	
 			LCD_ShowString(260,200,"Sat",HUE_LCD_FONT,HUE_LCD_BACK,24,0);	
 		break;
-	}		
+	}	
+
+	//服务器连接状态图标
+	if((GSM_SERVAL_STATUS == TRUE) || (WIFI_SERVAL_STATUS == TRUE))
+	{
+		LCD_ShowPicture32PixFont(COOR_ICON_SERVER_X,COOR_ICON_SERVER_Y,ICON_32X32_SERVER,HUE_LCD_FONT,HUE_LCD_BACK,0);	
+	}else if((GSM_SERVAL_STATUS == FALSE) && (WIFI_SERVAL_STATUS == FALSE)){
+		LCD_ShowPicture32PixFont(COOR_ICON_SERVER_X,COOR_ICON_SERVER_Y,ICON_32X32_CLEAR,HUE_LCD_FONT,HUE_LCD_BACK,0);	
+	}
+	
 }
 
 

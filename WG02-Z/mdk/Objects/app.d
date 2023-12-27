@@ -4,10 +4,12 @@
 .\objects\app.o: ..\Hal\hal_key.h
 .\objects\app.o: ..\Hal\hal_adc.h
 .\objects\app.o: ..\Hal\hal_gpio.h
+.\objects\app.o: ..\Hal\hal_wtn6.h
 .\objects\app.o: ..\mt\mt_tftlcd.h
 .\objects\app.o: ..\mt\mt_lora.h
 .\objects\app.o: ..\mt\lcdfont.h
 .\objects\app.o: ..\mt\mt_wifi.h
 .\objects\app.o: ..\App\para.h
 .\objects\app.o: ..\mt\mt_4G.h
+.\objects\app.o: ..\OS\OS_System.h
 .\objects\app.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\string.h

@@ -18,6 +18,8 @@ unsigned char WIFI_TxBuff[WIFI_TX_QUEUE_SUM][WIFI_TX_BUFFSIZE_MAX];
 unsigned char WIFI_RxBuff[WIFI_RXBUFFSIZE_MAX];
 static unsigned char Resend_Time = 0;			//重发次数
 
+unsigned char WIFI_SERVAL_STATUS;				//WIFI服务器状态
+
 
 en_Esp12_sta WIFI_Sta;
 en_WIFI_NetSta WIFI_NetSta;
@@ -34,7 +36,7 @@ const char ESP12_AT[ESP12_AT_MAX][ESP12_AT_LEN]=
 	"AT+CWSTARTSMART=2\0",						//启动某种类型的SmartConfig模式  1：ESP=TOUCH  2:AirKiss  3:AirKiss+Esptouch
 	"AT+CWSTOPSMART\0",							//停止SmartConfig	
 	"AT+CWSTATE?\0",      						//获取WIFI 的链接状态        	 
-	"AT+CWLAP=\"\0",							//获取WIFI的信号强弱
+	"AT+CWLAP=\"\0",							//获取可用WIFI
 
 	"AT+MQTTUSERCFG=0,1,\"",  					//MQTT CONFESP12_AT_MQTTUSERCFG
 	"AT+MQTTCONN=0,\"",    						//MQTT CONNESP12_AT_MQTTCONN,
@@ -739,12 +741,14 @@ static void Wifi_Rx_Response_Handle(unsigned char *pData,en_esp12_atResponse res
 		{
 			Resend_Time = 0;
 			mt_wifi_Mqtt_Step(STEP_MQTT_SUB);
+			WIFI_SERVAL_STATUS = TRUE;
 		}
 		break;
 
 		case ESP12_AT_RESPONSE_MQTTDISCONN:
 		{
 			Resend_Time++;
+			WIFI_SERVAL_STATUS = FALSE;
 		}
 		break;
 
@@ -938,6 +942,7 @@ static void hal_WifiTx_Pro(void)
 			if(Time_Delay_WifiSta == 2000)
 			{
 				mt_wifi_DataPack(ESP12_AT_CWSTATE,&i);
+				//mt_wifi_DataPack(ESP12_AT_CWLAP_CUR,&i);
 				Time_Delay_WifiSta = 0;
 			}
 
@@ -978,6 +983,7 @@ void mt_wifi_init(void)
 	WIFI_NetSta.WIFI_Net_Sta = ESP12_LINK_FAIL;
 	memset(WIFI_NetSta.WIFI_SSid, 0, sizeof(WIFI_NetSta.WIFI_SSid));
 	MQTT_Step = STEP_MQTT_FREE;
+	WIFI_SERVAL_STATUS = FALSE;
 	
 }
 

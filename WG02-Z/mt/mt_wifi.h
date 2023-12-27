@@ -113,4 +113,6 @@ void mt_wifi_changState(en_Esp12_sta sta);
 void mt_wifi_Mqtt_SentDat(unsigned char *buf);
 unsigned char mt_wifi_GetState(void);
 
+extern unsigned char WIFI_SERVAL_STATUS;	
+
 #endif

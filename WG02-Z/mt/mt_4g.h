@@ -206,5 +206,6 @@ void mt_4G_MesSend_Ctrl(unsigned char *pdata);
 void mt_4g_Mqtt_SentDat(unsigned char Type ,unsigned char *buf);
 
 extern unsigned char GSM_SIGNAL;
+extern unsigned char GSM_SERVAL_STATUS;	
 #endif
 
