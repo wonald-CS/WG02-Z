@@ -18,6 +18,7 @@
         "hal_uart.h": "c",
         "app.h": "c",
         "hal_al6630.h": "c",
-        "hal_key.h": "c"
+        "hal_key.h": "c",
+        "mt_tftlcd.h": "c"
     }
 }

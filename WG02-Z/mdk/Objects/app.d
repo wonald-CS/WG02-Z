@@ -5,6 +5,7 @@
 .\objects\app.o: ..\Hal\hal_adc.h
 .\objects\app.o: ..\Hal\hal_gpio.h
 .\objects\app.o: ..\Hal\hal_wtn6.h
+.\objects\app.o: ..\Hal\hal_tftlcd.h
 .\objects\app.o: ..\mt\mt_tftlcd.h
 .\objects\app.o: ..\mt\mt_lora.h
 .\objects\app.o: ..\mt\lcdfont.h

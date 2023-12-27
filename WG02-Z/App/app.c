@@ -4,6 +4,7 @@
 #include "hal_adc.h"
 #include "hal_gpio.h"
 #include "hal_wtn6.h"
+#include "hal_tftlcd.h"
 #include "mt_tftlcd.h"
 #include "mt_lora.h"
 #include "lcdfont.h"
@@ -14,31 +15,89 @@
 #include "string.h"
 
 
+stu_mode_menu *pModeMenu;	///当前执行的菜单	
+
+
 static void temHum_icon_Display(unsigned char fuc);
 static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta);
 static void PowerState_icon_Display(void);
 static void	showSystemTime(void);
 static void Gsm_icon_Display(void);
 static void Wifi_icon_Display(void);
+static void Menu_Init(void);
+static void Screen_On_Off(unsigned char Screen_Index);
+static void Screen_Display(void);
 
 static str_LoraAppNetState stgMenu_LoraDetectorApplyNetPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
 static unsigned char str_lora_loracommPro(en_lora_eventTypedef event,str_cmdApplyNet pData);
 
+unsigned int Screen_Timer;
+unsigned char Screen_Display_Flag;
+
 void app_task_init(void)
 {
+	Screen_Timer = 0;
+	Screen_Display_Flag = FALSE;
 	hal_KeyScanCBSRegister(KeyEventHandle); 
 	mt_loraRxApplyNet_callback_Register(stgMenu_LoraDetectorApplyNetPro);
 	mt_lora_loracomm_callback_Register(str_lora_loracommPro);
+	Menu_Init();
+	Screen_On_Off(TRUE);
 }
 
 void app_task(void)
 {
+	Screen_Display();
 	showSystemTime();
 	temHum_icon_Display(1);
 	PowerState_icon_Display();
 	Gsm_icon_Display();
 	Wifi_icon_Display();
+	
+}
 
+
+
+static void Screen_Display(void)
+{
+	//子菜单不操作20S返回原始桌面，该功能未做
+
+	if((pModeMenu->refreshScreenCmd == SCREEN_CMD_RESET)||(pModeMenu->refreshScreenCmd == SCREEN_CMD_RECOVER))
+	{
+		pModeMenu->refreshScreenCmd = SCREEN_CMD_NULL;
+		pModeMenu->Key_Par.keyVal = 0xFF;
+		hal_Tftlcd_Clear();
+		showSystemTime();
+		temHum_icon_Display(1);
+		PowerState_icon_Display();
+		Gsm_icon_Display();
+		Wifi_icon_Display();
+	}
+
+	if(Screen_Display_Flag && pModeMenu->menuPos == DESKTOP_MENU_POS)
+	{
+		Screen_Timer ++;
+		if (Screen_Timer > Srceen_Off_Time)
+		{
+			Screen_Timer = 0;
+			Screen_On_Off(FALSE);
+		}
+	}
+}
+
+stu_mode_menu generalModeMenu[GNL_MENU_SUM] =
+{
+	{DESKTOP_MENU_POS,SCREEN_CMD_NULL,0xFF,0},		
+};	
+
+
+static void Menu_Init(void)
+{
+	//结构体指针的赋值要先通过&赋值，给整个结构体分配内存,然后才能操作结构体变量
+	pModeMenu = &generalModeMenu[GNL_MENU_DESKTOP];	
+	// pModeMenu->menuPos = DESKTOP_MENU_POS;
+	// pModeMenu->Key_Par.keyVal = 0;
+	// pModeMenu->Key_Par.state = 5;
 }
 
 
@@ -110,6 +169,12 @@ static void temHum_icon_Display(unsigned char fuc)
 
 static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 {	
+	if(!Screen_Display_Flag)
+	{
+		Screen_On_Off(TRUE);
+	}
+	pModeMenu->Key_Par.keyVal = keys;
+	pModeMenu->Key_Par.state = sta;
 	//unsigned char test[256];
 
 	  switch((unsigned char)keys)
@@ -248,6 +313,11 @@ static void KeyEventHandle(EN_KEYNUM keys,KEY_VALUE_TYPEDEF sta)
 			}
 			break;
 		}
+
+		if(sta == KEY_CLICK)
+		{
+			hal_Wtn6_PlayVolue(WTN6_VOLUE_DI);
+		} 
 
 }
 
@@ -440,5 +510,22 @@ static void Gsm_icon_Display(void)
 	/************************************/
 }
 
-
-
+/*******************************************************************************************
+*@description:屏幕熄灭或者点亮函数
+*@param[in]：Screen_Index？0：熄灭，1：点亮
+*@return：
+*@others：
+********************************************************************************************/
+static void Screen_On_Off(unsigned char Screen_Index)
+{
+	if (Screen_Index)
+	{
+		hal_Oled_Display_on();
+		Screen_Display_Flag = TRUE;
+	}else
+	{
+		hal_Oled_Display_off();
+		Screen_Display_Flag = FALSE;
+	}
+	
+}
