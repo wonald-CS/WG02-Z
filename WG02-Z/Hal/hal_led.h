@@ -8,6 +8,7 @@
 #define LED7_PIN			GPIO_Pin_15
 
 void hal_LedInit(void);
-void hal_Led1Turn(void);
+void hal_LedProc(void);
+void hal_Led_Task(void);	
 #endif
 

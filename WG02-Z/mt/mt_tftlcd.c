@@ -6,18 +6,6 @@ static void hal_tftlcd_Delay(unsigned int de);
 //void showSystemTime(void);
 unsigned char ColorBuf[640];
 
-void hal_tftlcd_delay_lcd()
-{
-	unsigned int i,j;
-	i= 100;
-	
-	while(i--)
-	{ 
-		j= 6000;
-		while(j--);
-	}		
-}
-
 void mt_tftlcd_init(void)
 {
   	hal_tftlcdConfig();//初始化GPIO
@@ -114,10 +102,11 @@ void mt_tftlcd_init(void)
 		LCD_WR_DATA8(0x20);
 		LCD_WR_REG(0x29);
 		hal_Oled_Display_on();//打开背光
-		
-		LCD_Fill(0,0,LCD_W,LCD_H,BLACK);
-		LCD_ShowString(30,100," WUJI-MCU STUDY",HUE_LCD_FONT,HUE_LCD_BACK,FORTSIZE_32,0);
-		hal_tftlcd_delay_lcd();
+
+		//LCD_Fill(0,0,LCD_W,LCD_H,YELLOW);
+		//hal_Tftlcd_Clear();
+
+//		showSystemTime();
 } 
 
 /******************************************************************************
