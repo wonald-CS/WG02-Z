@@ -221,6 +221,12 @@ void mt_flashEraseSector(unsigned int Dst_Addr)
 	mt_flashWaitBusy();   				   //µÈ´ı²Á³ıÍê³É
 }
 
+void mt_flash_SaveDat(unsigned int addr,unsigned char *p,unsigned char lon)
+{
+	mt_flashWrite(p,addr,lon);
+}
+
+
 /*unsigned char falshtest[6000];
 void mt_flash_test(void)
 {

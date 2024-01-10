@@ -366,7 +366,7 @@ void I2C_PageWrite(unsigned short address,unsigned char *pDat, unsigned short nu
  void hal_eepromInit(void)
 {
 	hal_I2CConfig();
-	//hal_eeprom_test();
+//	hal_eeprom_test();
 }
 
 

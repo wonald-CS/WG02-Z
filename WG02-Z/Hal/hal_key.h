@@ -28,7 +28,7 @@ typedef enum
 	KEY_MENU,
 	KEY_DISARM,
 	KEY_HOMEARM,
-	KEY_AWAYARM,
+	KEY_AWARARM,
 	
 	KEY_RETURN_DAIL,
 	KEY9,
@@ -38,7 +38,7 @@ typedef enum
 	KEY0,
 	KEY8_DOWN,
 	KEY5,	
-    KEY2_UP,	
+  KEY2_UP,	
 
     KEY_SOS_DEL,	
 	KEY7,

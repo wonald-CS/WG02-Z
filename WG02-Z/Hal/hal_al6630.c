@@ -142,12 +142,13 @@ void hal_GetTemHumProc(void)
 		case TEMHUM_STEP0_SENTHEAD_L:
 		{//发起起始信号 10ms
 			GPIO_SetBits(GPIOA,GPIO_Pin_7);
-			hal_Tim3_SentDatPin(0); ///配置为输入模式
+		//	hal_Tim3_SentDatPin(0); ///配置为输入模式
 			hal_Tim_CapInit();  //初始化参数
 			temHumBufDat.step = TEMHUM_STEP0_GET_TEMHUM_DAT;
 			hal_timer3CapConfig(0XFFFF,72-1);	///单片机工作的时钟是72M  0-1   71-72   1M  0.000 001S 1us
 	        TIM_Cmd(TIM3, ENABLE);
 			TIM_SetCounter(TIM3,0);
+			hal_Tim3_SentDatPin(0); ///配置为输入模式
 		}
 		break;		
 		case TEMHUM_STEP0_GET_TEMHUM_DAT:

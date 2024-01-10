@@ -58,13 +58,13 @@ enum
 #define COOR_ICON_BAT_X   33
 #define COOR_ICON_BAT_Y   1
 
-#define  COOR_ICON_SERVER_X   200
+#define  COOR_ICON_SERVER_X   210
 #define  COOR_ICON_SERVER_Y    1
 
-#define  COOR_ICON_WIFI_X   240
+#define  COOR_ICON_WIFI_X   250
 #define  COOR_ICON_WIFI_Y    1
 
-#define  COOR_ICON_SIM_X   280
+#define  COOR_ICON_SIM_X   282
 #define  COOR_ICON_SIM_Y    1
 
 #define  COOR_ICON_SYSTEMODE_X   70

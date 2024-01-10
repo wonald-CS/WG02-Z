@@ -9,7 +9,7 @@ typedef enum //typevent :char
 	LORA_COM_ALARM,  //系统报警
 	LORA_COM_TAMPER, //防拆按键
 	LORA_COM_DISARM, //系统撤防  遥控器
-   LORA_COM_AWAYARM,  //离家布防
+    LORA_COM_AWAYARM,  //离家布防
 	LORA_COM_HOMEARM, //在家布防
 	LORA_COM_CLOSE,   //门磁开门
 

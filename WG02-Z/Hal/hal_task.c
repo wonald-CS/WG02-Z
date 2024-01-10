@@ -19,8 +19,8 @@ void hal_task_init(void)
 	hal_wtn6();
 	hal_timer_capInit();
 	hal_keyInit();
-  	hal_UsartInit();
-  	hal_UsartProc();
+  hal_UsartInit();
+  hal_UsartProc();
 	hal_Adc_batInit();
 	hal_eepromInit();
 }

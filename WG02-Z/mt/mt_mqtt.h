@@ -1,8 +1,6 @@
 #ifndef ____MT_MQTT_H_
 #define ____MT_MQTT_H_
 
-
-
 #define MQTT_LINKID_SIZE_MAX    	30
 #define MQTT_USERNAME_SIZE_MAX  	30
 #define MQTT_PASSWORD_SIZE_MAX  	32
@@ -10,45 +8,35 @@
 #define MQTT_SERVERPORT_SIZE_MAX  	10
 #define MQTT_TPIC_SIZE_MAX          30
 
-//typedef enum
-//{
-//	MQTT_UPEVENT_GET_TIME = (unsigned char)0, 
-//	MQTT_UPEVENT_DISARM,
-//	MQTT_UPEVENT_ARM,
-//	MQTT_UPEVENT_HOMEARM,
-//	MQTT_UPEVENT_ALARM, 
-//}en_mqtt_Upevent;
 
-typedef struct
-{
-	unsigned char event;
-	unsigned char buffer[1];
-}str_mqtt_Upevent;
+
+//extern str_mqtt_Upevent mqtt_upEvent;
 
 
 typedef enum
 {
-	MQTT_REC_MESSAGE_NEW, 
-	MQTT_REC_MESSAGE_FREE,
+	MQTT_REC_MESSAGE_NEW, ///有新固件
+	MQTT_REC_MESSAGE_FREE,///没有固件
 }en_mqtt_recNewFlag;
-
 
 typedef struct
 {
-	unsigned char linkID[MQTT_LINKID_SIZE_MAX];					//客户端ID
-	unsigned char username[MQTT_USERNAME_SIZE_MAX];				//用户名
-	unsigned char password[MQTT_PASSWORD_SIZE_MAX];				//密码
-	unsigned char serverIp[MQTT_SERVERIP_SIZE_MAX];				//服务器IP
-	unsigned char serverPort[MQTT_SERVERPORT_SIZE_MAX];			//服务器端口
-	unsigned char subtopic[MQTT_TPIC_SIZE_MAX];					//订阅主题
-  	unsigned char pubtopic[MQTT_TPIC_SIZE_MAX];					//发布主题
-	en_mqtt_recNewFlag Newflag;  
+	unsigned char linkID[MQTT_LINKID_SIZE_MAX];
+	unsigned char username[MQTT_USERNAME_SIZE_MAX];
+	unsigned char password[MQTT_PASSWORD_SIZE_MAX];
+	unsigned char serverIp[MQTT_SERVERIP_SIZE_MAX];
+	unsigned char serverPort[MQTT_SERVERPORT_SIZE_MAX];
+	unsigned char subtopic[MQTT_TPIC_SIZE_MAX];
+  unsigned char pubtopic[MQTT_TPIC_SIZE_MAX];
+	en_mqtt_recNewFlag Newflag;    ///报警主机是否有新的固件 
 }str_mqtt_parameter;
 
 extern str_mqtt_parameter  mqtt_para;
 
 void mt_mqtt_init(void);
+
 void mt_mqtt_SetNewFlag(en_mqtt_recNewFlag flag);
+unsigned char mt_mqtt_GetNewFlag(void);
 
 #endif
 

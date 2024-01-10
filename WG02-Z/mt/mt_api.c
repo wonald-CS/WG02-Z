@@ -4,8 +4,10 @@ const unsigned short wCRCTalbeAbs[] =
 {
 	0x0000, 0xCC01, 0xD801, 0x1400, 0xF001, 0x3C00, 0x2800, 0xE401, 0xA001, 0x6C00, 0x7800, 0xB401, 0x5000, 0x9C01, 0x8801, 0x4400,
 };
-
- 
+//wCRC = 0xffff;   a
+// 01    a   02  b   03  c
+//   c  04  d  05  e  06 f   
+// 10000   10000  10000  
 unsigned short mt_api_crc16(unsigned char *ptr, unsigned int len) 
 {
 	unsigned short wCRC = 0xFFFF;
@@ -23,9 +25,32 @@ unsigned short mt_api_crc16(unsigned char *ptr, unsigned int len)
 	wCRC = (temp[0]<<8)|temp[1];
 	return wCRC;
 }
+///////////////////////////////////////////
+unsigned short mt_api_crc16_continuous(unsigned char *ptr, unsigned int len,unsigned short crc16) 
+{
+//	unsigned short tt;
+//	unsigned int i;
+//	unsigned char j;
+  unsigned short i;
+	unsigned char temp[2];
+	unsigned char chChar;
+	unsigned short wCRC;
+	 wCRC = crc16;
+	
+	 for (i = 0; i < len; i++)
+	 {
+		chChar = *ptr++;
+		wCRC = wCRCTalbeAbs[(chChar ^ wCRC) & 15] ^ (wCRC >> 4);
+		wCRC = wCRCTalbeAbs[((chChar >> 4) ^ wCRC) & 15] ^ (wCRC >> 4);
+	 }
+	 temp[0] = wCRC&0xFF; 
+	 temp[1] = (wCRC>>8)&0xFF;
+	 wCRC = (temp[0]<<8)|temp[1];	
+	 return wCRC;
+}	
 
 
-//获取AT指令返回信息的长度
+//////获取AT指令返回信息的长度
 static unsigned int GetAtRspStrLen(unsigned char *p)
 {
 	unsigned int len;
@@ -41,14 +66,9 @@ static unsigned int GetAtRspStrLen(unsigned char *p)
 	}
 	return len;
 }
-
-
-/*******************************************************************************************
-*@description:查找是否有字符串相同
-*@param[in]：*pdata：缓存数组
-*@return：有相同字符串，则返回字符串相同的起始下标。若无，返回0xff
-*@others：
-********************************************************************************************/
+// 在字符串1中查找字符串2， 查看子字符串2是不是字符串1 的子函数
+// 在字符串1中没有找到字符串2 返回0xff；
+//返回字符串相同的起始下标
 unsigned int SeekSrting(unsigned char *str1,unsigned char *str2,unsigned int st1long)
 {
 	unsigned int i,log,relog,zi;
@@ -58,10 +78,8 @@ unsigned int SeekSrting(unsigned char *str1,unsigned char *str2,unsigned int st1
 	{
 		log = st1long - st2len+1;////比较的总的次数 
 	}
-	else{
+	else
 		return 0xff;
-	}
-		
 	relog = 0;     //用来记录 比较过程中 有多少个字母相同了 
 	for(i=0;i<log;i++)
 	{
@@ -80,7 +98,8 @@ unsigned int SeekSrting(unsigned char *str1,unsigned char *str2,unsigned int st1
 				if(*str1 == *str2)
 				{
 				}
-				else{
+				else
+				{
 					str1-=relog;
 					str2-=relog;
 					relog = 0;
@@ -94,14 +113,8 @@ unsigned int SeekSrting(unsigned char *str1,unsigned char *str2,unsigned int st1
 	}
 	return 0xff;
 }
-
-
-/*******************************************************************************************
-*@description:HEX转换Ascii值
-*@param[in]：*HexDat：HEX数据，*ascDtt：转换后的Ascii数据，len：长度
-*@return：
-*@others：
-********************************************************************************************/
+///////
+///////
 void StringhexToAsciiConversion(unsigned char *HexDat,unsigned char *ascDtt,unsigned int len)
 {
 	  unsigned int lenx;
@@ -138,14 +151,6 @@ void StringhexToAsciiConversion(unsigned char *HexDat,unsigned char *ascDtt,unsi
 		}		
 }
 
-
-
-/*******************************************************************************************
-*@description:HEX转换Ascii值
-*@param[in]：dat：HEX数据
-*@return：
-*@others：
-********************************************************************************************/
 void hexToAsciiConversion(unsigned char dat,unsigned char *Hdat,unsigned char *Ldat)
 {
 		if((dat & 0x0f) < 0x0A)
@@ -168,14 +173,7 @@ void hexToAsciiConversion(unsigned char dat,unsigned char *Hdat,unsigned char *L
 		}			
 }
 
-
-/*******************************************************************************************
-*@description:Ascii转换Hex值
-*@param[in]：*asciiDat：Ascii数据, asciiLen:数据长度，*hexDat：转换的Hex值
-*@return：
-*@others：
-********************************************************************************************/
-void asciiToHexConversion(unsigned char *asciiDat,unsigned char *hexDat,unsigned short asciiLen)
+void asciiToHexConversion(unsigned char *asciiDat,unsigned short asciiLen,unsigned char *hexDat)
 {
 	unsigned char *pdata,len;
 	pdata = asciiDat;
@@ -215,3 +213,7 @@ void asciiToHexConversion(unsigned char *asciiDat,unsigned char *hexDat,unsigned
 		len -= 2;
 	}
 }
+
+
+
+

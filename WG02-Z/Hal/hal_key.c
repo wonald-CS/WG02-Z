@@ -26,11 +26,11 @@ static unsigned char hal_getDB4Sta(void);
 
 unsigned char (*getKeysVal[K_BCD_NUM])() =
  { 
-	hal_getDB4Sta,
-	hal_getDB3Sta,
-	hal_getDB2Sta,
-	hal_getDB1Sta,
-	hal_getDB0Sta
+      hal_getDB4Sta,
+      hal_getDB3Sta,
+      hal_getDB2Sta,
+      hal_getDB1Sta,
+      hal_getDB0Sta
 };
 
 unsigned char KeyState[KEYNUM];			//按键状态
@@ -115,7 +115,7 @@ static void hal_LoadKeyState(unsigned char *KeyLineState)
 			KeyLineState[KEY_HOMEARM] = 1;
 		break;
 		case 0x04:			//3
-			KeyLineState[KEY_AWAYARM] = 1;
+			KeyLineState[KEY_AWARARM] = 1;
 		break;
 		case 0x05:			//4
 			KeyLineState[KEY_RETURN_DAIL] = 1;

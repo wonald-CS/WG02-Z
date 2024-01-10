@@ -12,7 +12,8 @@
 #define W25X_ManufactDeviceID	   0x90 
 
 void mt_flashInit(void);
-
+void mt_flash_SaveDat(unsigned int addr,unsigned char *p,unsigned char lon);
+void mt_flashRead(unsigned char *pBuffer,unsigned int ReadAddr,unsigned int NumByteToRead);
 #endif
 
 

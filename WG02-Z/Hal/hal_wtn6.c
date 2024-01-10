@@ -35,18 +35,18 @@ static void hal_Wtn6Config(void)
 
 	GPIO_InitStructure.GPIO_Pin = WTN6_CLK_PIN | WTN6_DAT_PIN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; ; 
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	GPIO_InitStructure.GPIO_Pin = SC8002_SH_PIN;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  
 	GPIO_Init(SC8002_SH_PORT, &GPIO_InitStructure);	
 	
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; ; 
 	GPIO_Init(GPIOC, &GPIO_InitStructure);	
 	
 	GPIO_SetBits(GPIOC,GPIO_Pin_1);	
