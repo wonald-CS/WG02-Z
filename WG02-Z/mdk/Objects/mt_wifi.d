@@ -1,0 +1,9 @@
+.\objects\mt_wifi.o: ..\mt\mt_wifi.c
+.\objects\mt_wifi.o: ..\OS\OS_System.h
+.\objects\mt_wifi.o: ..\Hal\hal_uart.h
+.\objects\mt_wifi.o: ..\mt\mt_wifi.h
+.\objects\mt_wifi.o: ..\mt\mt_API.h
+.\objects\mt_wifi.o: ..\mt\mt_mqtt.h
+.\objects\mt_wifi.o: ..\Hal\hal_Gpio.h
+.\objects\mt_wifi.o: C:\Keil\ARM\ARMCC\Bin\..\include\string.h
+.\objects\mt_wifi.o: ..\mt\mt_protocol.h
