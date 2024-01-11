@@ -1,0 +1,21 @@
+.\objects\app.o: ..\App\app.c
+.\objects\app.o: ..\App\app.h
+.\objects\app.o: ..\OS\os_system.h
+.\objects\app.o: ..\Hal\hal_al6630.h
+.\objects\app.o: ..\Hal\hal_wtn6.h
+.\objects\app.o: ..\Hal\hal_key.h
+.\objects\app.o: ..\Hal\hal_adc.h
+.\objects\app.o: ..\Hal\hal_gpio.h
+.\objects\app.o: ..\Hal\hal_eeprom.h
+.\objects\app.o: ..\Hal\hal_tftlcd.h
+.\objects\app.o: ..\Hal\hal_timer.h
+.\objects\app.o: ..\mt\mt_tftlcd.h
+.\objects\app.o: ..\mt\mt_lora.h
+.\objects\app.o: ..\mt\mt_wifi.h
+.\objects\app.o: ..\mt\mt_4g.h
+.\objects\app.o: ..\mt\mt_api.h
+.\objects\app.o: ..\mt\mt_protocol.h
+.\objects\app.o: ..\mt\mt_update.h
+.\objects\app.o: ..\mt\lcdfont.h
+.\objects\app.o: ..\App\para.h
+.\objects\app.o: E:\keep going\Keil\ARM\ARMCC\Bin\..\include\string.h
